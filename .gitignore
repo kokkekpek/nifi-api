@@ -1,0 +1,8 @@
+node_modules
+package-lock.json
+dist
+src/node_modules
+logs
+./lib/
+config.json
+ormconfig.json

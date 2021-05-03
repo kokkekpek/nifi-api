@@ -1,0 +1,9 @@
+{
+	"root": true,
+	"extends": [
+		"eslint-config-rg"
+	],
+	"rules": {
+		"@typescript-eslint/no-require-imports": "error"
+	}
+}

@@ -2,6 +2,7 @@ import 'source-map-support/register';
 import * as fs from "fs";
 import * as rg from "rg";
 import { Config } from './config';
+import { createDatabase } from './database/database';
 
 async function main(): Promise<void> {
 	const RAW_DEFAULT_CONFIG = fs.readFileSync('./config.default.json', 'utf-8');
@@ -25,6 +26,9 @@ async function main(): Promise<void> {
 		rg.setProduction();
 	}
 
+	console.log("Инициализация базы данных...");
+	await createDatabase(config.mysql);
+	
 	console.log("Инициализация завершена!");
 }
 

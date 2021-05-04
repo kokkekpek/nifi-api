@@ -2,6 +2,7 @@ import {
 	createConnection,
 	Connection
 } from "typeorm";
+import { DatabaseToken } from "./models/token";
 
 
 export type MysqlConfig = {
@@ -33,7 +34,9 @@ export async function createDatabase(config: MysqlConfig): Promise<Connection> {
 
 		bigNumberStrings: true,
 	
-		entities: []
+		entities: [
+			DatabaseToken
+		]
 	});
 
 	return connection;

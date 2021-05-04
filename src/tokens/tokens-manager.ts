@@ -29,7 +29,7 @@ export class TokensManager {
 				return "token_with_such_id_already_exists";
 			}
 	
-			this.storage.addToken(token);
+			await this.storage.addToken(token);
 			return "success";
 		} finally {
 			mutexUnlock(mutexName);

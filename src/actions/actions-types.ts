@@ -1,16 +1,19 @@
-import { Token } from "../tokens/tokens-manager";
-
 type BaseAction = {
 	readonly time: number;
 };
 
 export type ActionCreateToken = BaseAction & {
 	readonly action: "create";
-} & Token;
+	readonly tokenId: string;
+	readonly address: string;
+	readonly userPublicKey: string;
+	readonly owner: string;
+	readonly hash: string;
+};
 
 export type ActionChangeOwner = BaseAction & {
 	readonly action: "changeOwner";
-	readonly id: string;
+	readonly tokenId: string;
 	readonly address: string;
 	readonly previousOwner: string;
 	readonly owner: string;
@@ -19,7 +22,7 @@ export type ActionChangeOwner = BaseAction & {
 
 export type ActionSetHash = BaseAction & {
 	readonly action: "setHash";
-	readonly id: string;
+	readonly tokenId: string;
 	readonly address: string;
 	readonly owner: string;
 	readonly hash: string;

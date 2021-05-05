@@ -5,8 +5,8 @@ export type Token = {
 	readonly id: string;
 	readonly address: string;
 	readonly userPublicKey: string;
-	readonly owner: string;
-	readonly hash: string;
+	owner: string;
+	hash: string;
 };
 
 export type AddTokenResult = "success" | "token_with_such_id_already_exists";
@@ -34,6 +34,14 @@ export class TokensManager {
 		} finally {
 			mutexUnlock(mutexName);
 		}
+	}
+
+	public async setOwnerByTokenId(tokenId: string, newOwner: string): Promise<void> {
+		await this.storage.setOwnerByTokenId(tokenId, newOwner);
+	}
+
+	public async setHashByTokenId(tokenId: string, newHash: string): Promise<void> {
+		await this.storage.setHashByTokenId(tokenId, newHash);
 	}
 
 	public async getAllTokens(): Promise<Token[]> {

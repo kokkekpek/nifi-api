@@ -86,7 +86,7 @@ export class TonClientRootContract implements ITonRootContract {
 		}
 	}
 
-	public async getMessages(): Promise<RgResult<DecodedMessage[], number>> {
+	private async getMessages(): Promise<RgResult<DecodedMessage[], number>> {
 		let result: unknown[];
 
 		try {

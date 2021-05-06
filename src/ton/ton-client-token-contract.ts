@@ -5,16 +5,9 @@ import {
 	TonTokenContractGetInfoResult
 } from "./ton-token-contract";
 
-import * as fs from "fs";
 import { TonClient } from "@ton-client-ts/node";
 import { RgResult } from "rg";
-import { Abi } from "@ton-client-ts/core/types/modules/abi/types";
-import { ResultOfProcessMessage } from "@ton-client-ts/core/types/modules/processing/types";
-
-const ART_TOKEN_ABI: Abi = {
-	type: "Contract",
-	value: JSON.parse(fs.readFileSync("./abi/ArtToken.abi.json", "utf-8"))
-};
+import { ResultOfRunGet } from "@ton-client-ts/core/types/modules/tvm/types";
 
 export type TonKeys = {
 	readonly private: string;
@@ -31,29 +24,29 @@ type InfoResult = {
 	readonly owner: string;
 };
 
+type BocResult = {
+	readonly boc: string;
+};
+
 export class TonClientTokenContractFactory implements ITonTokenContractFactory {
-	private readonly keys: TonKeys;
 	private readonly tonClient: TonClient;
 
-	constructor(keys: TonKeys, tonClient: TonClient) {
-		this.keys = keys;
+	constructor(tonClient: TonClient) {
 		this.tonClient = tonClient;
 	}
 
 	public getTokenContract(addr: string): ITonTokenContract {
-		return new TonClientTokenContract(this.tonClient, addr, this.keys);
+		return new TonClientTokenContract(this.tonClient, addr);
 	}
 }
 
 export class TonClientTokenContract implements ITonTokenContract {
 	private readonly tonClient: TonClient;
 	private readonly address: string;
-	private readonly keys: TonKeys;
 
-	constructor(tonClient: TonClient, address: string, keys: TonKeys) {
+	constructor(tonClient: TonClient, address: string) {
 		this.tonClient = tonClient;
 		this.address = address;
-		this.keys = keys;
 	}
 
 	public getAddress(): string {
@@ -117,25 +110,24 @@ export class TonClientTokenContract implements ITonTokenContract {
 	}
 
 	private async invoke(functionName: string): Promise<RgResult<unknown, number>> {
-		let result: ResultOfProcessMessage;
+		const bocResult = await this.getBoc();
+
+		if (!bocResult.is_success) {
+			return {
+				is_success: false,
+				error: {
+					code: -1,
+					message: "Ошибка валидации BOC"
+				}
+			};
+		}
+
+		let result: ResultOfRunGet;
 
 		try {
-			result = await this.tonClient.processing.process_message({
-				message_encode_params: {
-					abi: ART_TOKEN_ABI,
-					address: this.address,
-					call_set: {
-						function_name: functionName
-					},
-					signer: {
-						type: "Keys",
-						keys: {
-							secret: this.keys.private,
-							public: this.keys.public
-						}
-					}
-				},
-				send_events: false
+			result = await this.tonClient.tvm.run_get({
+				account: bocResult.data,
+				function_name: functionName
 			});
 		} catch (err) {
 			return {
@@ -147,7 +139,7 @@ export class TonClientTokenContract implements ITonTokenContract {
 			};
 		}
 
-		if (!result.decoded || !result.decoded.output) {
+		if (!result.output) {
 			return {
 				is_success: false,
 				error: {
@@ -157,7 +149,52 @@ export class TonClientTokenContract implements ITonTokenContract {
 			};
 		}
 
-		return result.decoded.output;
+		return result.output;
+	}
+
+	private async getBoc(): Promise<RgResult<string, number>> {
+		let result: unknown[];
+
+		try {
+			const queryCollectionResult = await this.tonClient.net.query_collection({
+				collection: "accounts",
+				filter: {
+					id: { eq: this.address },
+				},
+				result: "boc",
+				limit: 1
+			});
+
+			result = queryCollectionResult.result;
+		} catch (err) {
+			return {
+				is_success: false,
+				error: {
+					code: -1,
+					message: err.message
+				}
+			};
+		}
+
+		const validatedBoc = getValidatedBocResult(result[0]);
+
+		if (!validatedBoc) {
+			console.log("Ошибка валидации попытки получения boc для адреса", this.address);
+			console.log(result[0]);
+
+			return {
+				is_success: false,
+				error: {
+					code: -1,
+					message: "Ошибка валидации"
+				}
+			};
+		}
+
+		return {
+			is_success: true,
+			data: validatedBoc.boc
+		};
 	}
 }
 
@@ -205,5 +242,19 @@ function getValidatedInfoResult(input: unknown): InfoResult | null {
 		id: input.id,
 		owner: input.owner,
 		publicKey: input.publicKey
+	};
+}
+
+function getValidatedBocResult(input: unknown): BocResult | null {
+	if (!isStruct(input)) {
+		return null;
+	}
+
+	if (typeof input.boc !== "string") {
+		return null;
+	}
+
+	return {
+		boc: input.boc
 	};
 }

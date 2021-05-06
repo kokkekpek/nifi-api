@@ -5,13 +5,14 @@ import {
 	TonTokenContractGetInfoResult
 } from "./ton-token-contract";
 
-import { TonClient } from "@ton-client-ts/node";
+import * as fs from "fs";
 import { RgResult } from "rg";
-import { ResultOfRunGet } from "@ton-client-ts/core/types/modules/tvm/types";
 
-export type TonKeys = {
-	readonly private: string;
-	readonly public: string;
+import { Abi, ResultOfRunTvm, TonClient } from "@tonclient/core";
+
+const ART_TOKEN_ABI: Abi = {
+	type: "Contract",
+	value: JSON.parse(fs.readFileSync("./abi/ArtToken.abi.json", "utf-8"))
 };
 
 type ArtInfoResult = {
@@ -122,12 +123,24 @@ export class TonClientTokenContract implements ITonTokenContract {
 			};
 		}
 
-		let result: ResultOfRunGet;
+		let result: ResultOfRunTvm;
 
 		try {
-			result = await this.tonClient.tvm.run_get({
+			const encodedMessage = await this.tonClient.abi.encode_message({
+				abi: ART_TOKEN_ABI,
+				signer: {
+					type: "None"
+				},
+				call_set: {
+					function_name: functionName,
+					input: {}
+				},
+				address: this.address
+			});
+			
+			result = await this.tonClient.tvm.run_tvm({
+				message: encodedMessage.message,
 				account: bocResult.data,
-				function_name: functionName
 			});
 		} catch (err) {
 			return {
@@ -139,7 +152,23 @@ export class TonClientTokenContract implements ITonTokenContract {
 			};
 		}
 
-		if (!result.output) {
+		const rawMessage = result.out_messages[0];
+		if (!rawMessage) {
+			return {
+				is_success: false,
+				error: {
+					code: -1,
+					message: "Ответ не содержит сообщений"
+				}
+			};
+		}
+
+		const decoded = await this.tonClient.abi.decode_message({
+			abi: ART_TOKEN_ABI,
+			message: rawMessage
+		});
+
+		if (!decoded.value) {
 			return {
 				is_success: false,
 				error: {
@@ -149,7 +178,10 @@ export class TonClientTokenContract implements ITonTokenContract {
 			};
 		}
 
-		return result.output;
+		return {
+			is_success: true,
+			data: decoded.value
+		};
 	}
 
 	private async getBoc(): Promise<RgResult<string, number>> {
@@ -210,7 +242,6 @@ function getValidatedArtInfoResult(input: unknown): ArtInfoResult | null {
 	if (!isStruct(input)) {
 		return null;
 	}
-
 
 	if (typeof input.hash !== "string") {
 		return null;

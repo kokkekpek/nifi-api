@@ -238,13 +238,7 @@ export class TonClientRootContract implements ITonRootContract {
 		const bocResult = await this.getBoc();
 
 		if (!bocResult.is_success) {
-			return {
-				is_success: false,
-				error: {
-					code: -1,
-					message: "Ошибка валидации BOC"
-				}
-			};
+			return bocResult;
 		}
 
 		let result: ResultOfRunTvm;
@@ -332,6 +326,16 @@ export class TonClientRootContract implements ITonRootContract {
 			};
 		}
 
+		if (!result[0]) {
+			return {
+				is_success: false,
+				error: {
+					code: -1,
+					message: "TON SDK вернул пустой массив на запрос BOC"
+				}
+			};
+		}
+
 		const validatedBoc = getValidatedBocResult(result[0]);
 
 		if (!validatedBoc) {
@@ -342,7 +346,7 @@ export class TonClientRootContract implements ITonRootContract {
 				is_success: false,
 				error: {
 					code: -1,
-					message: "Ошибка валидации"
+					message: "Ошибка валидации BOC"
 				}
 			};
 		}

@@ -36,7 +36,6 @@ export class TonActionsEvents implements IActionsEvents {
 	private async getFullTokenInfo(tokenContract: ITonTokenContract): Promise<RgResult<GetFullTokenInfoResult>> {
 		const addr = tokenContract.getAddress();
 
-		console.log("Выполняю getArtInfo... для контракта", addr);
 		const artInfoResult = await tokenContract.getArtInfo();
 
 		if (!artInfoResult.is_success) {
@@ -46,12 +45,9 @@ export class TonActionsEvents implements IActionsEvents {
 			return artInfoResult;
 		}
 
-		console.log("getArtInfo для контракта", addr, "выполнен успешно");
-
 		const floodLimitsPreventiveDelayMs = 500;
 		await timeout(floodLimitsPreventiveDelayMs);
 
-		console.log("Выполняю getInfo... для контракта", addr);
 		const infoResult = await tokenContract.getInfo();
 
 		if (!infoResult.is_success) {
@@ -60,8 +56,6 @@ export class TonActionsEvents implements IActionsEvents {
 
 			return infoResult;
 		}
-
-		console.log("getInfo для контракта", addr, "выполнен успешно");
 
 		return {
 			is_success: true,
@@ -107,7 +101,6 @@ export class TonActionsEvents implements IActionsEvents {
 				const floodLimitsPreventiveDelayMs = 1000;
 				await timeout(floodLimitsPreventiveDelayMs);
 
-				console.log("Обновляю информацию о контракте", token.address);
 				const tokenContract = this.tokenContractFactory.getTokenContract(token.address);
 				const fullTokenInfoResult = await this.getFullTokenInfo(tokenContract);
 
@@ -120,6 +113,8 @@ export class TonActionsEvents implements IActionsEvents {
 				}
 
 				if (token.hash !== fullTokenInfoResult.data.hash) {
+					console.log("У контракта", token.address, "изменился hash, обновляю");
+
 					this.event.emit({
 						action: "setHash",
 						time: Date.now(),
@@ -136,6 +131,8 @@ export class TonActionsEvents implements IActionsEvents {
 				}
 
 				if (token.owner !== fullTokenInfoResult.data.owner) {
+					console.log("У контракта", token.address, "изменился owner, обновляю");
+
 					this.event.emit({
 						action: "changeOwner",
 						time: Date.now(),

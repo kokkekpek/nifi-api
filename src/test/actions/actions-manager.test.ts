@@ -10,7 +10,7 @@ let actionsManager: ActionsManager;
 
 beforeEach(async () => {
 	const connection = await createConnection({
-		type: "sqlite", // SQLite используется в целях тестирования, т.к. поддерживает БД в ОЗУ
+		type: "sqlite", // SQLite is used for testing purposes because supports DB in RAM
 		database: ":memory:",
 		dropSchema: true,
 		entities: [

@@ -1,4 +1,4 @@
-// Код этого файла получился очень плохим, рекомендуется переделать
+// The code of this file turned out to be very bad, it is recommended to redo
 
 import { Repository } from "typeorm";
 import { DatabaseActionChangeOwner } from "../database/models/action-change-owner";
@@ -25,7 +25,7 @@ export class ActionsStorageDatabase implements IActionsStorage {
 	private getDatabaseActionByAction(action: Action): DatabaseAction {
 		let databaseAction: DatabaseAction;
 
-		// Исправь меня: Нарушение SOLID-принципа открытости / закрытости (OCP)
+		// Fix Me: Open / Closed SOLID Violation (OCP)
 		switch (action.action) {
 			case "create":
 				databaseAction = new DatabaseActionCreateToken(
@@ -70,7 +70,7 @@ export class ActionsStorageDatabase implements IActionsStorage {
 	private getActionByDatabaseAction(databaseAction: DatabaseAction): Action {
 		let action: Action;
 
-		// Исправь меня: Нарушение SOLID-принципа открытости / закрытости (OCP)
+		// Fix Me: Open / Closed SOLID Violation (OCP)
 		if (databaseAction instanceof DatabaseActionCreateToken) {
 			action = {
 				action: "create",

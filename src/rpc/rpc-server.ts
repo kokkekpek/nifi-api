@@ -45,12 +45,12 @@ export class RpcServer {
 		res: http.ServerResponse
 	): Promise<void> {
 		const request = new RpcRequest(req, res, {});
-		console.log("RPC Запрос:", req.method, req.url);
+		console.log("RPC Request:", req.method, req.url);
 
 		const validationResult = this.getValidatedRequest(req);
 
 		if (validationResult === null) {
-			console.log("RPC Запрос не прошёл базовую валидацию, отклонён");
+			console.log("RPC Request failed basic validation, rejected");
 			request.error("rpc_validation_fault", StatusCodes.BadRequest);
 
 			return;
@@ -63,7 +63,7 @@ export class RpcServer {
 		const handler = this.methods.get(validationResult.method);
 
 		if (!handler) {
-			console.log("RPC Запрос: Метод не может быть найден, отклонён");
+			console.log("RPC Request: Method could not be found, rejected");
 			request.error("rpc_method_not_found", StatusCodes.NotFound);
 
 			return;
@@ -103,7 +103,7 @@ export class RpcServer {
 		}
 
 		if (isValidationFailed) {
-			console.log("RPC Запрос: Неправильные параметры, отклонён");
+			console.log("RPC Request: Invalid parameters, rejected");
 			request.error("rpc_bad_parameters", StatusCodes.BadRequest);
 			return;
 		}
@@ -113,8 +113,8 @@ export class RpcServer {
 		try {
 			await handler.onRequest(checkedRequest);
 		} catch (err) {
-			console.error("Произошла критическая ошибка при обработке RPC-Запроса:");
-			console.error("Детали запроса:", req.method, req.url);
+			console.error("Fatal error occurred while processing an RPC Request:");
+			console.error("Request details:", req.method, req.url);
 			console.error(err);
 
 			request.error("rpc_internal_error", StatusCodes.IntervalServerError);

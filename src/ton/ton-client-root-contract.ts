@@ -83,7 +83,7 @@ export class TonClientRootContract implements ITonRootContract {
 			const messagesResult = await this.getMessages();
 
 			if (!messagesResult.is_success) {
-				console.log("Не удалось получить сообщения корневого кошелька:");
+				console.log("Failed to get root wallet messages:");
 				console.log(messagesResult.error);
 
 				const delayBeforeRetryAfterError = 3000;
@@ -105,17 +105,17 @@ export class TonClientRootContract implements ITonRootContract {
 				this.lastTokenId++;
 				isLastTokenIdModified = true;
 
-				console.log("Получаю адрес токена с идентификатором", tokenId);
+				console.log("Getting the address of the token with the identifier", tokenId);
 				const tokenAddressResult = await this.getTokenAddress(tokenId + "");
 
 				if (!tokenAddressResult.is_success) {
-					console.log("Не удалось получить адрес токена с идентификатором", tokenId);
+					console.log("Failed to get token address with id", tokenId);
 					console.log(tokenAddressResult.error);
 
 					continue;
 				}
 
-				console.log("Получен адрес токена", tokenId, tokenAddressResult.data);
+				console.log("Token address received", tokenId, tokenAddressResult.data);
 
 				this.created.emit({
 					addr: tokenAddressResult.data
@@ -339,14 +339,14 @@ export class TonClientRootContract implements ITonRootContract {
 		const validatedBoc = getValidatedBocResult(result[0]);
 
 		if (!validatedBoc) {
-			console.log("Ошибка валидации попытки получения boc для корневого контракта");
+			console.log("Validation fault for attempt to get BOC for root contract");
 			console.log(result[0]);
 
 			return {
 				is_success: false,
 				error: {
 					code: -1,
-					message: "Ошибка валидации BOC"
+					message: "BOC Validation Fault"
 				}
 			};
 		}

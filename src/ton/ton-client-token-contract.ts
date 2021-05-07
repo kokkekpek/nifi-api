@@ -92,7 +92,7 @@ export class TonClientTokenContract implements ITonTokenContract {
 		const info = getValidatedInfoResult(result.data);
 
 		if (info === null) {
-			console.log("Ошибка валидации ответа на getInfo для адреса", this.address);
+			console.log("Response validation fault to getInfo for address", this.address);
 			console.log(result.data);
 
 			return {
@@ -215,7 +215,7 @@ export class TonClientTokenContract implements ITonTokenContract {
 		const validatedBoc = getValidatedBocResult(result[0]);
 
 		if (!validatedBoc) {
-			console.log("Ошибка валидации попытки получения boc для адреса", this.address);
+			console.log("Validation fault for attempt to get BOC for address", this.address);
 			console.log(result[0]);
 
 			return {

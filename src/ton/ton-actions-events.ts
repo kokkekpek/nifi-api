@@ -39,7 +39,7 @@ export class TonActionsEvents implements IActionsEvents {
 		const artInfoResult = await tokenContract.getArtInfo();
 
 		if (!artInfoResult.is_success) {
-			console.log("Выполнение getArtInfo для контракта", addr, "завершено с ошибкой");
+			console.log("Executing getArtInfo for a contract", addr, "completed with an error");
 			console.log(artInfoResult.error);
 
 			return artInfoResult;
@@ -51,7 +51,7 @@ export class TonActionsEvents implements IActionsEvents {
 		const infoResult = await tokenContract.getInfo();
 
 		if (!infoResult.is_success) {
-			console.log("Выполнение getInfo для контракта", addr, "завершено с ошибкой");
+			console.log("Executing getInfo for a contract", addr, "completed with an error");
 			console.log(infoResult.error);
 
 			return infoResult;
@@ -69,14 +69,14 @@ export class TonActionsEvents implements IActionsEvents {
 	}
 
 	private async onTokenCreated(event: TonContractTokenCreatedEvent): Promise<void> {
-		console.log("Получено событие создания токена от корневого контракта:\n", event);
+		console.log("Received token creation event from root contract:\n", event);
 
-		console.log("Получаю подробную информацию о контракте", event.addr);
+		console.log("Receiving detailed information about the contract", event.addr);
 		const tokenContract = this.tokenContractFactory.getTokenContract(event.addr);
 		const fullTokenInfoResult = await this.getFullTokenInfo(tokenContract);
 		
 		if (!fullTokenInfoResult.is_success) {
-			console.log("Не удалось получить подробную информацию о контракте", event.addr, "пропускаю");
+			console.log("Failed to get detailed information about the contract", event.addr, "skipped");
 			return;
 		}
 
@@ -106,14 +106,14 @@ export class TonActionsEvents implements IActionsEvents {
 
 				if (!fullTokenInfoResult.is_success) {
 					console.log(
-						"Не удалось получить подробную информацию о контракте", token.address, "пока не обновляю"
+						"Failed to get detailed information about the contract", token.address, "not updating yet"
 					);
 
 					continue;
 				}
 
 				if (token.hash !== fullTokenInfoResult.data.hash) {
-					console.log("У контракта", token.address, "изменился hash, обновляю");
+					console.log("The hash of the contract", token.address, "has changed, updating");
 
 					this.event.emit({
 						action: "setHash",
@@ -131,7 +131,7 @@ export class TonActionsEvents implements IActionsEvents {
 				}
 
 				if (token.owner !== fullTokenInfoResult.data.owner) {
-					console.log("У контракта", token.address, "изменился owner, обновляю");
+					console.log("The owner of the contract", token.address, "has changed, updating");
 
 					this.event.emit({
 						action: "changeOwner",

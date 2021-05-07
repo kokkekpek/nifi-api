@@ -50,14 +50,14 @@ async function main(): Promise<void> {
 		rg.setProduction();
 	}
 
-	console.log("Инициализация базы данных...");
+	console.log("Database initialization...");
 	const db = await createDatabase(config.mysql);
 
-	console.log("Инициализация менеджера токенов...");
+	console.log("Tokens manager initialization...");
 	const tokensStorage = new TokensStorageDatabase(db.getRepository(DatabaseToken));
 	const tokensManager = new TokensManager(tokensStorage);
 
-	console.log("Инициализация менеджера действий...");
+	console.log("Actions manager initialization...");
 	const actionsStorage = new ActionsStorageDatabase({
 		changeOwner: db.getRepository(DatabaseActionChangeOwner),
 		create: db.getRepository(DatabaseActionCreateToken),
@@ -65,29 +65,29 @@ async function main(): Promise<void> {
 	});
 	const actionsManager = new ActionsManager(actionsStorage);
 
-	console.log("Инициализация средств работы с TON...");
+	console.log("TON Tools initialization...");
 	const tonClient = new TonClient({ network: { server_address: config.ton.serverAddress } });
 	const tonClientRootContract = new TonClientRootContract(tonClient, config.ton.rootContractAddress);
 	const tonClientTokenContractFactory = new TonClientTokenContractFactory(tonClient);
 
-	console.log("Инициализация поставщика событий TON...");
+	console.log("TON Event Provider initialization...");
 	const tonActionsEvents = new TonActionsEvents(
 		tokensManager,
 		tonClientRootContract,
 		tonClientTokenContractFactory
 	);
 
-	console.log("Инициализация коллекционера действий...");
+	console.log("Action collector initialization...");
 	new ActionsCollector(actionsManager, tonActionsEvents);
 
-	console.log("Инициализация коллекционера токенов...");
+	console.log("Token collector initialization...");
 	new TokensCollector(tokensManager, tonActionsEvents);
 
-	console.log("Инициализация RPC-Сервера...");
+	console.log("RPC Server initialization...");
 	const rpcServer = new RpcServer(config.rpcServer);
 	await rpcServer.start();
 
-	console.log("Инициализация RPC-Методов...");
+	console.log("RPC Methods initialization...");
 	const getActionsByToken = new GetActionsByToken(actionsManager);
 	const getActionsByUser = new GetActionsByUserPublicKey(actionsManager);
 	const getAllActions = new GetAllActions(actionsManager);
@@ -100,7 +100,7 @@ async function main(): Promise<void> {
 	rpcServer.addMethod("get-tokens-by-user", getTokensByUser);
 	rpcServer.addMethod("get-all-tokens", getAllTokens);
 
-	console.log("Инициализация завершена!");
+	console.log("Initialization done!");
 }
 
 main();

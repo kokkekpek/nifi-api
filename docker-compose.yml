@@ -1,0 +1,30 @@
+version: "3.8"
+services:
+    nifi-index:
+        container_name: nifi-index
+        restart: unless-stopped
+        build: .
+        networks: 
+            - main  
+        depends_on: 
+            - db
+        volumes: 
+            - ./logs:/app/logs
+        ports: 
+            - "127.0.0.1:3380:3380"
+    db:
+        container_name: mysql
+        image: mysql:5.7
+        restart: unless-stopped
+        networks: 
+            - main  
+        expose: 
+            - 3306
+        environment: 
+            MYSQL_ROOT_PASSWORD: "toor"
+            MYSQL_USER: "service"
+            MYSQL_PASS: "service"
+            MYSQL_DATABASE: "nifi-api"
+networks:
+    main:
+        driver: bridge

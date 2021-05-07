@@ -1,0 +1,17 @@
+{
+	"isProduction": false,
+	"mysql": {
+		"host": "mysql",
+		"port": 3306,
+		"user": "root",
+		"password": "toor",
+		"database": "nifi-api"
+	},
+	"rpcServer": {
+		"port": 3380
+	},
+	"ton": {
+		"serverAddress": "net.ton.dev",
+		"rootContractAddress": "0:1754c926afbe22337324598b116b56782992e6133272e63488913d319013cec6"
+	}
+}

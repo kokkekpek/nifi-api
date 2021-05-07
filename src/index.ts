@@ -66,8 +66,8 @@ async function main(): Promise<void> {
 	const actionsManager = new ActionsManager(actionsStorage);
 
 	console.log("Инициализация средств работы с TON...");
-	const tonClient = new TonClient({ network: { server_address: "net.ton.dev" } });
-	const tonClientRootContract = new TonClientRootContract(tonClient, config.rootContractAddress);
+	const tonClient = new TonClient({ network: { server_address: config.ton.serverAddress } });
+	const tonClientRootContract = new TonClientRootContract(tonClient, config.ton.rootContractAddress);
 	const tonClientTokenContractFactory = new TonClientTokenContractFactory(tonClient);
 
 	console.log("Инициализация поставщика событий TON...");

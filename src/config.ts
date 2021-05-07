@@ -5,4 +5,5 @@ export type Config = {
 	readonly isProduction: boolean;
 	readonly mysql: MysqlConfig;
 	readonly rpcServer: RpcServerConfig;
+	readonly rootContractAddress: string;
 };

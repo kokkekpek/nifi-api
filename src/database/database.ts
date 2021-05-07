@@ -2,6 +2,9 @@ import {
 	createConnection,
 	Connection
 } from "typeorm";
+import { DatabaseActionChangeOwner } from "./models/action-change-owner";
+import { DatabaseActionCreateToken } from "./models/action-create-token";
+import { DatabaseActionSetHash } from "./models/action-set-hash";
 import { DatabaseToken } from "./models/token";
 
 
@@ -35,7 +38,10 @@ export async function createDatabase(config: MysqlConfig): Promise<Connection> {
 		bigNumberStrings: true,
 	
 		entities: [
-			DatabaseToken
+			DatabaseToken,
+			DatabaseActionChangeOwner,
+			DatabaseActionSetHash,
+			DatabaseActionCreateToken
 		]
 	});
 

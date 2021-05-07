@@ -105,7 +105,7 @@ export class ActionsStorageDatabase implements IActionsStorage {
 			};
 		} else {
 			throw new Error(
-				"Неподдерживаемый DatabaseAction:\n"
+				"Unsupported DatabaseAction:\n"
 				+ JSON.stringify(databaseAction, null, "\t")
 			);
 		}

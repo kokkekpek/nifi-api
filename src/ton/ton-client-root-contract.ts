@@ -216,14 +216,14 @@ export class TonClientRootContract implements ITonRootContract {
 		const info = getValidatedTokenAddressResult(result.data);
 
 		if (info === null) {
-			console.log("Ошибка валидации ответа на getTokenAddress для корневого контракта");
+			console.log("Response validation fault to getTokenAddress for root contract");
 			console.log(result.data);
 
 			return {
 				is_success: false,
 				error: {
 					code: -1,
-					message: "Ошибка валидации"
+					message: "Validation fault"
 				}
 			};
 		}
@@ -276,7 +276,7 @@ export class TonClientRootContract implements ITonRootContract {
 				is_success: false,
 				error: {
 					code: -1,
-					message: "Ответ не содержит сообщений"
+					message: "Response does not contain messages"
 				}
 			};
 		}
@@ -291,7 +291,7 @@ export class TonClientRootContract implements ITonRootContract {
 				is_success: false,
 				error: {
 					code: -1,
-					message: "Ответ не содержит полезных данных"
+					message: "Response does not contain useful data"
 				}
 			};
 		}
@@ -331,7 +331,7 @@ export class TonClientRootContract implements ITonRootContract {
 				is_success: false,
 				error: {
 					code: -1,
-					message: "TON SDK вернул пустой массив на запрос BOC"
+					message: "TON SDK returned empty response on BOC request"
 				}
 			};
 		}

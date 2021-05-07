@@ -64,14 +64,14 @@ export class TonClientTokenContract implements ITonTokenContract {
 		const info = getValidatedArtInfoResult(result.data);
 
 		if (info === null) {
-			console.log("Ошибка валидации ответа на getArtInfo для адреса", this.address);
+			console.log("Response validation fault to getArtInfo for address", this.address);
 			console.log(result.data);
 
 			return {
 				is_success: false,
 				error: {
 					code: -1,
-					message: "Ошибка валидации"
+					message: "Validation fault"
 				}
 			};
 		}
@@ -99,7 +99,7 @@ export class TonClientTokenContract implements ITonTokenContract {
 				is_success: false,
 				error: {
 					code: -1,
-					message: "Ошибка валидации"
+					message: "Validation fault"
 				}
 			};
 		}
@@ -152,7 +152,7 @@ export class TonClientTokenContract implements ITonTokenContract {
 				is_success: false,
 				error: {
 					code: -1,
-					message: "Ответ не содержит сообщений"
+					message: "Response does not contain messages"
 				}
 			};
 		}
@@ -167,7 +167,7 @@ export class TonClientTokenContract implements ITonTokenContract {
 				is_success: false,
 				error: {
 					code: -1,
-					message: "Ответ не содержит полезных данных"
+					message: "Response does not contain useful data"
 				}
 			};
 		}
@@ -207,7 +207,7 @@ export class TonClientTokenContract implements ITonTokenContract {
 				is_success: false,
 				error: {
 					code: -1,
-					message: "TON SDK вернул пустой массив на запрос BOC"
+					message: "TON SDK returned empty response on BOC request"
 				}
 			};
 		}
@@ -222,7 +222,7 @@ export class TonClientTokenContract implements ITonTokenContract {
 				is_success: false,
 				error: {
 					code: -1,
-					message: "Ошибка валидации BOC"
+					message: "BOC Validation fault"
 				}
 			};
 		}

@@ -20,6 +20,12 @@ import { DatabaseActionSetHash } from './database/models/action-set-hash';
 import { ActionsManager } from './actions/actions-manager';
 import { ActionsCollector } from './actions/actions-collector';
 import { TokensCollector } from './tokens/tokens-collector';
+import { RpcServer } from './rpc/rpc-server';
+import { GetActionsByToken } from './rpc-methods/get-actions-by-token';
+import { GetActionsByUserPublicKey } from './rpc-methods/get-actions-by-user';
+import { GetAllActions } from './rpc-methods/get-all-actions';
+import { GetTokensByUserPublicKey } from './rpc-methods/get-tokens-by-user';
+import { GetAllTokens } from './rpc-methods/get-all-tokens';
 
 TonClient.useBinaryLibrary(libNode);
 async function main(): Promise<void> {
@@ -76,6 +82,23 @@ async function main(): Promise<void> {
 
 	console.log("Инициализация коллекционера токенов...");
 	new TokensCollector(tokensManager, tonActionsEvents);
+
+	console.log("Инициализация RPC-Сервера...");
+	const rpcServer = new RpcServer(config.rpcServer);
+	await rpcServer.start();
+
+	console.log("Инициализация RPC-Методов...");
+	const getActionsByToken = new GetActionsByToken(actionsManager);
+	const getActionsByUser = new GetActionsByUserPublicKey(actionsManager);
+	const getAllActions = new GetAllActions(actionsManager);
+	const getTokensByUser = new GetTokensByUserPublicKey(tokensManager);
+	const getAllTokens = new GetAllTokens(tokensManager);
+
+	rpcServer.addMethod("get-actions-by-token", getActionsByToken);
+	rpcServer.addMethod("get-actions-by-user", getActionsByUser);
+	rpcServer.addMethod("get-all-actions", getAllActions);
+	rpcServer.addMethod("get-tokens-by-user", getTokensByUser);
+	rpcServer.addMethod("get-all-tokens", getAllTokens);
 
 	console.log("Инициализация завершена!");
 }

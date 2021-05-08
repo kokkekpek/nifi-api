@@ -99,39 +99,29 @@ export class TonClientRootContract implements ITonRootContract {
 				continue;
 			}
 
-			let isLastTokenIdModified = false;
+			const tokenId = this.lastTokenId;
+			const tokenAddressResult = await this.getTokenAddress(tokenId + "");
 
-			for (const message of messagesResult.data) {
-				const validatedMessage = getValidatedCreateMessage(message.body);
+			if (!tokenAddressResult.is_success) {
+				console.log("Failed to get token address with id", tokenId);
+				console.log(tokenAddressResult.error);
 
-				if (validatedMessage === null) continue;
-
-				await timeout(500);
-
-				const tokenId = this.lastTokenId;
-				this.lastTokenId++;
-				isLastTokenIdModified = true;
-
-				console.log("Getting the address of the token with the identifier", tokenId);
-				const tokenAddressResult = await this.getTokenAddress(tokenId + "");
-
-				if (!tokenAddressResult.is_success) {
-					console.log("Failed to get token address with id", tokenId);
-					console.log(tokenAddressResult.error);
-
-					continue;
-				}
-
-				console.log("Token address received", tokenId, tokenAddressResult.data);
-
-				this.created.emit({
-					addr: tokenAddressResult.data
-				});
+				continue;
 			}
 
-			if (isLastTokenIdModified) {
-				this.saveLastTokenId();
+			const newBoc = await this.getBoc(tokenAddressResult.data);
+			if (!newBoc.is_success) {
+				continue;
 			}
+
+			this.lastTokenId++;
+			console.log("Token address received", tokenId, tokenAddressResult.data);
+
+			this.created.emit({
+				addr: tokenAddressResult.data
+			});
+
+			this.saveLastTokenId();
 
 			const floodLimitsPreventiveDelayMs = 1000;
 			await timeout(floodLimitsPreventiveDelayMs);
@@ -320,14 +310,14 @@ export class TonClientRootContract implements ITonRootContract {
 		};
 	}
 
-	private async getBoc(): Promise<RgResult<string, number>> {
+	private async getBoc(address?: string): Promise<RgResult<string, number>> {
 		let result: unknown[];
 
 		try {
 			const queryCollectionResult = await this.tonClient.net.query_collection({
 				collection: "accounts",
 				filter: {
-					id: { eq: this.address },
+					id: { eq: address || this.address },
 				},
 				result: "boc",
 				limit: 1

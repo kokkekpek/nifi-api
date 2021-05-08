@@ -18,19 +18,16 @@ type FileDescriptor = {
 	fh: fs.FileHandle | null;
 };
 
-/** Файловый дескриптор для обычных логов */
 const fdLogs: FileDescriptor = {
 	filename: null,
 	fh: null
 };
 
-/** Файловый дескриптор для ошибок */
 const fdErrors: FileDescriptor = {
 	filename: null,
 	fh: null
 };
 
-/** Файловый дескриптор для предупреждений */
 const fdWarnings: FileDescriptor = {
 	filename: null,
 	fh: null

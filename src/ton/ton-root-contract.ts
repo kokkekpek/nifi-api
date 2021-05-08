@@ -1,4 +1,4 @@
-import { Event } from "rg";
+import { Event } from "../utils/events";
 
 export type TonContractTokenCreatedEvent = {
 	readonly addr: string;

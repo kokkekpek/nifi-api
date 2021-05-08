@@ -1,7 +1,9 @@
-import { Event, RgResult, timeout } from "rg";
 import { IActionsEvents } from "../actions/actions-events";
 import { Action } from "../actions/actions-types";
 import { TokensManager } from "../tokens/tokens-manager";
+import { Event } from "../utils/events";
+import { RgResult } from "../utils/result";
+import { timeout } from "../utils/timeout";
 import { ITonRootContract, TonContractTokenCreatedEvent } from "./ton-root-contract";
 import { ITonTokenContract, ITonTokenContractFactory } from "./ton-token-contract";
 

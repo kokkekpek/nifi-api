@@ -1,7 +1,16 @@
 import * as http from "http";
-import { StatusCodes } from "rg-web";
 import { RpcRequest } from "./rpc-request";
 import { IRpcRequestHandler, RequestData } from "./rpc-request-handler";
+
+export const enum StatusCodes {
+	Ok = 200,
+	BadRequest = 400,
+	Unauthorized = 401,
+	Forbidden = 403,
+	NotFound = 404,
+	PreconditionFailed = 412,
+	IntervalServerError = 500
+}
 
 type RequestValidationSuccess = {
 	method: string;

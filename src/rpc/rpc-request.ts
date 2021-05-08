@@ -1,6 +1,6 @@
 import * as http from "http";
-import { StatusCodes } from "rg-web";
 import { RequestData } from "./rpc-request-handler";
+import { StatusCodes } from "./rpc-server";
 
 export class RpcRequest<Parameters extends RequestData> {
 	private readonly req: http.IncomingMessage;

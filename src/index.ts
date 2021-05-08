@@ -1,6 +1,7 @@
 import 'source-map-support/register';
 import * as fs from "fs";
-import * as rg from "rg";
+
+import "./logger/logger";
 
 import { Config } from './config';
 import { createDatabase } from './database/database';
@@ -26,6 +27,7 @@ import { GetActionsByUserPublicKey } from './rpc-methods/get-actions-by-user';
 import { GetAllActions } from './rpc-methods/get-all-actions';
 import { GetTokensByUserPublicKey } from './rpc-methods/get-tokens-by-user';
 import { GetAllTokens } from './rpc-methods/get-all-tokens';
+import { getMergedObjects, setProduction } from './utils/utils';
 
 TonClient.useBinaryLibrary(libNode);
 async function main(): Promise<void> {
@@ -41,13 +43,13 @@ async function main(): Promise<void> {
 		}
 	}
 
-	const config = rg.getMergedObjects<Config>(
+	const config = getMergedObjects<Config>(
 		JSON.parse(RAW_DEFAULT_CONFIG),
 		JSON.parse(RAW_CONFIG)
 	);
 
 	if (config.isProduction) {
-		rg.setProduction();
+		setProduction();
 	}
 
 	console.log("Database initialization...");

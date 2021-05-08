@@ -1,4 +1,4 @@
-import { RgResult } from "rg";
+import { RgResult } from "../utils/result";
 
 export type TonTokenContractGetArtInfoResult = {
 	readonly hash: string;

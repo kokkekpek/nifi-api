@@ -6,7 +6,7 @@ import {
 } from "./ton-token-contract";
 
 import * as fs from "fs";
-import { RgResult } from "rg";
+import { RgResult } from "../utils/result";
 
 import { Abi, ResultOfRunTvm, TonClient } from "@tonclient/core";
 

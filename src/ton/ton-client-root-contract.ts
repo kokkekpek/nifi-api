@@ -6,8 +6,10 @@ import {
 	TonClient
 } from "@tonclient/core";
 
-import { Event, RgResult, timeout } from "rg";
 import * as fs from "fs";
+import { Event } from "../utils/events";
+import { RgResult } from "../utils/result";
+import { timeout } from "../utils/timeout";
 import { ITonRootContract, TonContractTokenCreatedEvent } from "./ton-root-contract";
 
 const ART_ROOT_ABI: Abi = {

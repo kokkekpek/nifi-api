@@ -1,4 +1,4 @@
-import { Event } from "rg";
+import { Event } from "../utils/events";
 import { Action } from "./actions-types";
 
 export interface IActionsEvents {

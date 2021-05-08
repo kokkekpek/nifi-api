@@ -1,4 +1,4 @@
-import { mutexLockOrAwait, mutexUnlock } from "rg";
+import { mutexLockOrAwait, mutexUnlock } from "../utils/mutex";
 import { ITokensStorage } from "./tokens-storage";
 
 export type Token = {

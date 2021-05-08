@@ -10,14 +10,7 @@ RUN apt install -y netcat
 RUN curl -sL https://deb.nodesource.com/setup_14.x | bash -
 RUN apt-get install -y nodejs
 
-ARG NPM_TOKEN
-
-RUN echo "registry=https://npm.realgrace.me" > .npmrc
-RUN echo '//npm.realgrace.me/:_authToken="${NPM_TOKEN}"' >> .npmrc
-
 RUN npm i
 RUN npm run build
-
-RUN rm .npmrc
 
 CMD ["node", "dist/"]

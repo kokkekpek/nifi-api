@@ -20,9 +20,14 @@ const ART_ROOT_ABI: Abi = {
 type EncodedMessage = {
 	readonly body: string;
 	readonly created_at: number;
+	readonly dst_transaction: {
+		readonly aborted: boolean;
+		readonly id: string;
+	};
 };
 
 type DecodedMessage = {
+	readonly encodedMessage: EncodedMessage;
 	readonly body: Record<string, unknown>;
 	readonly createdAt: number;
 };
@@ -149,7 +154,7 @@ export class TonClientRootContract implements ITonRootContract {
 					created_at: { gt: this.lastMessageTime },
 					dst: { eq: this.address }
 				},
-				result: "body created_at",
+				result: "body created_at dst_transaction { aborted, id }",
 				limit: 100
 			});
 
@@ -169,7 +174,9 @@ export class TonClientRootContract implements ITonRootContract {
 		for (const entry of result) {
 			const encodedMessage = getValidatedEncodedMessage(entry);
 
-			if (encodedMessage === null) continue;
+			if (encodedMessage === null) {
+				continue;
+			}
 
 			encodedMessages.push(encodedMessage);
 		}
@@ -183,20 +190,29 @@ export class TonClientRootContract implements ITonRootContract {
 		const decodedMessages: DecodedMessage[] = [];
 
 		for (const encodedMessage of encodedMessages) {
+			if (encodedMessage.dst_transaction.aborted) {
+				continue;
+			}
+
 			let decoded: DecodedMessageBody;
 
 			try {
-				decoded = await this.tonClient.abi.decode_message({
+				decoded = await this.tonClient.abi.decode_message_body({
 					abi: ART_ROOT_ABI,
-					message: encodedMessage.body,
+					body: encodedMessage.body,
+					is_internal: true
 				});
 			} catch (err) {
 				continue;
 			}
 
-			if (!decoded.value) continue;
+			
+			if (!decoded.value) {
+				continue;
+			}
 
 			decodedMessages.push({
+				encodedMessage,
 				body: decoded.value,
 				createdAt: encodedMessage.created_at
 			});
@@ -381,9 +397,25 @@ function getValidatedEncodedMessage(input: unknown): EncodedMessage | null {
 		return null;
 	}
 
+	if (!isStruct(input.dst_transaction)) {
+		return null;
+	}
+
+	if (typeof input.dst_transaction.aborted !== "boolean") {
+		return null;
+	}
+
+	if (typeof input.dst_transaction.id !== "string") {
+		return null;
+	}
+
 	return {
 		body: input.body,
-		created_at: input.created_at
+		created_at: input.created_at,
+		dst_transaction: {
+			aborted: input.dst_transaction.aborted,
+			id: input.dst_transaction.id
+		}
 	};
 }
 

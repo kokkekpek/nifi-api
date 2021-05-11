@@ -5,4 +5,5 @@ export interface IActionsStorage {
 	getAllActions(): Promise<Action[]>;
 	getActionsByUserPublicKey(userPublicKey: string): Promise<Action[]>;
 	getActionsByTokenId(tokenId: string): Promise<Action[]>;
+	getActionsByOwner(owner: string): Promise<Action[]>;
 }

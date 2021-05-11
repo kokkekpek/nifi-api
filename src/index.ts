@@ -28,6 +28,7 @@ import { GetAllActions } from './rpc-methods/get-all-actions';
 import { GetTokensByUserPublicKey } from './rpc-methods/get-tokens-by-user';
 import { GetAllTokens } from './rpc-methods/get-all-tokens';
 import { getMergedObjects, setProduction } from './utils/utils';
+import { GetActionsByOwner } from './rpc-methods/get-actions-by-owner';
 
 TonClient.useBinaryLibrary(libNode);
 async function main(): Promise<void> {
@@ -92,12 +93,14 @@ async function main(): Promise<void> {
 	console.log("RPC Methods initialization...");
 	const getActionsByToken = new GetActionsByToken(actionsManager);
 	const getActionsByUser = new GetActionsByUserPublicKey(actionsManager);
+	const getActionsByOwner = new GetActionsByOwner(actionsManager);
 	const getAllActions = new GetAllActions(actionsManager);
 	const getTokensByUser = new GetTokensByUserPublicKey(tokensManager);
 	const getAllTokens = new GetAllTokens(tokensManager);
 
 	rpcServer.addMethod("get-actions-by-token", getActionsByToken);
 	rpcServer.addMethod("get-actions-by-user", getActionsByUser);
+	rpcServer.addMethod("get-actions-by-owner", getActionsByOwner);
 	rpcServer.addMethod("get-all-actions", getAllActions);
 	rpcServer.addMethod("get-tokens-by-user", getTokensByUser);
 	rpcServer.addMethod("get-all-tokens", getAllTokens);

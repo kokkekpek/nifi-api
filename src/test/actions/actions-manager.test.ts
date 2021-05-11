@@ -65,6 +65,10 @@ test("Get and add actions", async () => {
 	expect(actionsByPubKey1AfterFirstAddition).toHaveLength(1);
 	expect(actionsByPubKey1AfterFirstAddition[0]).toMatchObject(testAction1);
 
+	const actinosByOwner1AfterFirstAddition = await actionsManager.getActionsByOwner("TestActionOwner1");
+	expect(actinosByOwner1AfterFirstAddition).toHaveLength(1);
+	expect(actinosByOwner1AfterFirstAddition[0]).toMatchObject(testAction1);
+
 	const testAction2: ActionSetHash = {
 		action: "setHash",
 		tokenId: "TestActionToken2",
@@ -102,6 +106,14 @@ test("Get and add actions", async () => {
 	);
 	expect(actionsByPubKey2AfterSecondAddition).toHaveLength(1);
 	expect(actionsByPubKey2AfterSecondAddition[0]).toMatchObject(testAction2);
+
+	const actinosByOwner1AfterSecondAddition = await actionsManager.getActionsByOwner("TestActionOwner1");
+	expect(actinosByOwner1AfterSecondAddition).toHaveLength(1);
+	expect(actinosByOwner1AfterSecondAddition[0]).toMatchObject(testAction1);
+
+	const actinosByOwner2AfterSecondAddition = await actionsManager.getActionsByOwner("TestActionOwner2");
+	expect(actinosByOwner2AfterSecondAddition).toHaveLength(1);
+	expect(actinosByOwner2AfterSecondAddition[0]).toMatchObject(testAction2);
 
 	const testAction3: ActionSetHash = {
 		action: "setHash",

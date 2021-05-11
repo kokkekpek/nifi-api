@@ -176,4 +176,21 @@ export class ActionsStorageDatabase implements IActionsStorage {
 
 		return actions;
 	}
+
+	public async getActionsByOwner(owner: string): Promise<Action[]> {
+		const criteria = { owner };
+
+		const databaseActionsCreateToken = await this.repositories.create.find(criteria);
+		const databaseActionsChangeOwner = await this.repositories.changeOwner.find(criteria);
+		const databaseActionsSetHash = await this.repositories.setHash.find(criteria);
+
+		const databaseActions: DatabaseAction[] = databaseActionsCreateToken.concat(
+			databaseActionsChangeOwner,
+			databaseActionsSetHash
+		);
+
+		const actions = this.getActionsByDatabaseActions(databaseActions);
+
+		return actions;
+	}
 }

@@ -38,4 +38,11 @@ export class ActionsManager {
 
 		return actions;
 	}
+
+	public async getActionsByOwner(owner: string): Promise<Action[]> {
+		const actions = await this.storage.getActionsByOwner(owner);
+		this.sortActionsByTime(actions);
+
+		return actions;
+	}
 }

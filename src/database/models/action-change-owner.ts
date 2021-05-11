@@ -27,6 +27,7 @@ export class DatabaseActionChangeOwner {
 	previous_owner: string;
 
 	@Column({ length: 255, type: "varchar" })
+	@Index()
 	owner: string;
 
 	@Column({ length: 255, type: "varchar" })

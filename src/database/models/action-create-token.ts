@@ -24,6 +24,7 @@ export class DatabaseActionCreateToken {
 	user_public_key: string;
 
 	@Column({ length: 255, type: "varchar" })
+	@Index()
 	owner: string;
 
 	@Column({ length: 255, type: "varchar" })

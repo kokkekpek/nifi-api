@@ -6,4 +6,5 @@ export type TonContractTokenCreatedEvent = {
 
 export interface ITonRootContract {
 	created: Event<TonContractTokenCreatedEvent>;
+	updateLastTokenId(): void;
 }

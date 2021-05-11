@@ -85,6 +85,11 @@ export class TonClientRootContract implements ITonRootContract {
 		fs.writeFileSync("./last_token_id", this.lastTokenId + "");
 	}
 
+	public updateLastTokenId(): void {
+		this.lastTokenId++;
+		this.saveLastTokenId();
+	}
+
 	private async checkMessagesLoop(): Promise<void> {
 		while (true) {
 			const messagesResult = await this.getMessages();
@@ -114,14 +119,11 @@ export class TonClientRootContract implements ITonRootContract {
 				continue;
 			}
 
-			this.lastTokenId++;
 			console.log("Token address received", tokenId, tokenAddressResult.data);
 
 			this.created.emit({
 				addr: tokenAddressResult.data
 			});
-
-			this.saveLastTokenId();
 
 			const floodLimitsPreventiveDelayMs = 1000;
 			await timeout(floodLimitsPreventiveDelayMs);

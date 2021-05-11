@@ -33,6 +33,9 @@ import { GetTokensByOwner } from './rpc-methods/get-tokens-by-owner';
 
 TonClient.useBinaryLibrary(libNode);
 async function main(): Promise<void> {
+	const packageInfo = JSON.parse(fs.readFileSync("./package.json", "utf-8"));
+	console.log("Initialization " + packageInfo.name + " v" + packageInfo.version);
+
 	const RAW_DEFAULT_CONFIG = fs.readFileSync('./config.default.json', 'utf-8');
 	let RAW_CONFIG = "{}";
 

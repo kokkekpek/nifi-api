@@ -51,4 +51,8 @@ export class TokensManager {
 	public async getTokensByUserPublicKey(userPublicKey: string): Promise<Token[]> {
 		return await this.storage.getTokensByUserPublicKey(userPublicKey);
 	}
+
+	public async getTokensByOwner(owner: string): Promise<Token[]> {
+		return await this.storage.getTokensByOwner(owner);
+	}
 }

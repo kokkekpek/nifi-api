@@ -48,6 +48,10 @@ test("Get and add tokens", async () => {
 	expect(tokensByUserPublicKeyAfterFirstAddition).toHaveLength(1);
 	expect(tokensByUserPublicKeyAfterFirstAddition[0]).toMatchObject(testToken1);
 
+	const tokensByOwnerAfterFirstAddition = await tokensManager.getTokensByOwner("TestTokenOwner1");
+	expect(tokensByOwnerAfterFirstAddition).toHaveLength(1);
+	expect(tokensByOwnerAfterFirstAddition[0]).toMatchObject(testToken1);
+
 	const testToken2: Token = {
 		id: "TestTokenId2",
 		address: "TestTokenAddress2",
@@ -74,6 +78,14 @@ test("Get and add tokens", async () => {
 	);
 	expect(tokensByUserPublicKey2AfterSecondAddition).toHaveLength(1);
 	expect(tokensByUserPublicKey2AfterSecondAddition[0]).toMatchObject(testToken2);
+
+	const tokensByOwner1AfterSecondAddition = await tokensManager.getTokensByOwner("TestTokenOwner1");
+	expect(tokensByOwner1AfterSecondAddition).toHaveLength(1);
+	expect(tokensByOwner1AfterSecondAddition[0]).toMatchObject(testToken1);
+
+	const tokensByOwner2AfterSecondAddition = await tokensManager.getTokensByOwner("TestTokenOwner2");
+	expect(tokensByOwner2AfterSecondAddition).toHaveLength(1);
+	expect(tokensByOwner2AfterSecondAddition[0]).toMatchObject(testToken2);
 });
 
 test("Add two tokens with the same id", async () => {

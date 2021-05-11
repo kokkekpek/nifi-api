@@ -52,6 +52,11 @@ export class TokensStorageDatabase implements ITokensStorage {
 		return databaseTokens.map(this.getTokenByDatabaseToken);
 	}
 
+	public async getTokensByOwner(owner: string): Promise<Token[]> {
+		const databaseTokens = await this.repository.find({ owner });
+		return databaseTokens.map(this.getTokenByDatabaseToken);
+	}
+
 	public async setOwnerByTokenId(tokenId: string, newOwner: string): Promise<void> {
 		await this.repository.update({ tokenId }, {
 			owner: newOwner

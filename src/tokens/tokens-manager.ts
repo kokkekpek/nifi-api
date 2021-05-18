@@ -44,6 +44,10 @@ export class TokensManager {
 		await this.storage.setHashByTokenId(tokenId, newHash);
 	}
 
+	public async getTokenById(tokenId: string): Promise<Token | undefined> {
+		return await this.storage.getTokenById(tokenId);
+	}
+
 	public async getAllTokens(): Promise<Token[]> {
 		return await this.storage.getAllTokens();
 	}

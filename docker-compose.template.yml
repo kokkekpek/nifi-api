@@ -1,0 +1,55 @@
+version: "3.7"
+services:
+    nginx:
+        image: library/nginx:1.19
+        container_name: nifi-api-nginx
+        volumes:
+            - ./config/nginx/nginx.conf:/etc/nginx/nginx.conf
+            - ./config/nginx/conf.d:/etc/nginx/conf.d
+            - {cfg.nginx.log}:/var/log/nginx
+        labels:
+            - traefik.enable=true
+            - traefik.http.routers.nginx.rule=Host(`{cfg.nginx.domain}`)
+            #{!cfg.tls}- traefik.http.routers.nginx.entrypoints=web
+            #{cfg.tls}- traefik.http.routers.nginx.entrypoints=webSecure
+            #{cfg.tls}- traefik.http.routers.nginx.tls.certresolver=letsEncrypt
+        networks:
+            - traefik
+            - nifi-api
+
+    nifi-api:
+        container_name: nifi-api
+        restart: unless-stopped
+        build: .
+        networks:
+            - nifi-api
+        depends_on:
+            - db
+        volumes:
+            - {cfg.api.log}:/app/logs
+            - {cfg.api.data}:/var/lib/mysql
+        expose:
+            - 3000
+        #{cfg.api.openPorts}ports:
+            #{cfg.api.openPorts}- {cfg.api.port}:3000
+
+    db:
+        container_name: mysql
+        image: mysql:5.7
+        restart: unless-stopped
+        networks:
+            - nifi-api
+        expose:
+            - 3306
+        environment:
+            MYSQL_ROOT_PASSWORD: "{cfg.mysql.password}"
+            MYSQL_USER: "service"
+            MYSQL_PASS: "service"
+            MYSQL_DATABASE: "{cfg.mysql.database}"
+networks:
+    traefik:
+        external: false
+        name: traefik
+    nifi-api:
+        external: false
+        driver: bridge

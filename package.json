@@ -1,6 +1,6 @@
 {
   "name": "nifi-api",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "nifi-api",
   "repository": {
     "url": "https://github.com/kokkekpek/nifi-api"

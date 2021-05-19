@@ -6,7 +6,8 @@ src/node_modules
 logs
 ./lib/
 ormconfig.json
-
+last_message_time
+last_token_id
 config.json
 config/config.json
 config/nginx/nginx.conf

@@ -37,11 +37,11 @@ async function main(): Promise<void> {
 	const packageInfo = JSON.parse(fs.readFileSync("./package.json", "utf-8"));
 	console.log("Initialization " + packageInfo.name + " v" + packageInfo.version);
 
-	const RAW_DEFAULT_CONFIG = fs.readFileSync('./config.default.json', 'utf-8');
+	const RAW_DEFAULT_CONFIG = fs.readFileSync('./config/config.json', 'utf-8');
 	let RAW_CONFIG = "{}";
 
 	try {
-		RAW_CONFIG = fs.readFileSync("./config.json", "utf-8");
+		RAW_CONFIG = fs.readFileSync("./config/config.json", "utf-8");
 	} catch (err) {
 		if (err.code !== "ENOENT") {
 			console.error(err);

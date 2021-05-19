@@ -1,0 +1,32 @@
+{
+  "directories": {
+    "nginx.log": {
+      "path": "./log/nginx/nifi/api",
+      "permissions": 755
+    },
+    "api.log": {
+      "path": "./log/node/nifi/api",
+      "permissions": 755
+    },
+    "api.data": {
+      "path": "./data/mysql/nifi/api",
+      "permissions": 755
+    }
+  },
+  "values": {
+    "tls": false,
+
+    "nginx.domain": "api.nifi.localhost",
+    "nginx.workers": 1,
+    "nginx.workersConnections": 1024,
+
+    "mysql.password": "toor",
+    "mysql.database": "nifi",
+
+    "api.production": "true",
+    "api.openPorts": true,
+    "api.port": 3380,
+    "api.net": "https://net.ton.dev",
+    "api.contract": "0:278df8c563cf69dbf41adf17561ae9daa39f2b38a0ce1d73d8ac325aedbed480"
+  }
+}

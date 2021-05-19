@@ -18,10 +18,10 @@
 		{
 			"name": "create",
 			"inputs": [
-				{"name":"owner","type":"uint256"},
+				{"name":"owner","type":"address"},
 				{"name":"manager","type":"address"},
 				{"name":"managerUnlockTime","type":"uint32"},
-				{"name":"creator","type":"uint256"},
+				{"name":"creator","type":"address"},
 				{"name":"creatorFees","type":"uint32"},
 				{"name":"hash","type":"uint256"}
 			],

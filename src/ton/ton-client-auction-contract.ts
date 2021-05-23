@@ -133,8 +133,10 @@ export class TonClientAuctionContract implements ITonAuctionContract {
 			}
 		}
 
-		console.log("Auction contract", this.address, "checked", total, "messages");
-		console.log("Unvalidated:", unvalidatedEvents, "validated:", validatedEvents);
+		if (total !== 0) {
+			console.log("Auction contract", this.address, "checked", total, "messages");
+			console.log("Unvalidated:", unvalidatedEvents, "validated:", validatedEvents);
+		}
 	}
 
 	private async getMessages(): Promise<RgResult<DecodedMessage[], number>> {

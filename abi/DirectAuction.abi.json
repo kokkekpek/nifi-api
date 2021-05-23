@@ -42,7 +42,7 @@
 				{"name":"startBid","type":"uint128"},
 				{"name":"stepBid","type":"uint128"},
 				{"name":"feeBid","type":"uint128"},
-				{"name":"starTime","type":"uint32"},
+				{"name":"startTime","type":"uint32"},
 				{"name":"endTime","type":"uint32"},
 				{"components":[{"name":"bider","type":"address"},{"name":"value","type":"uint128"}],"name":"curBid","type":"tuple"}
 			]

@@ -44,7 +44,7 @@ type InfoResult = {
 	readonly startBid: string;
 	readonly stepBid: string;
 	readonly feeBid: string;
-	readonly starTime: string; // TODO: Fix typo
+	readonly startTime: string;
 	readonly endTime: string;
 };
 
@@ -261,7 +261,7 @@ export class TonClientAuctionContract implements ITonAuctionContract {
 				startBid: info.startBid,
 				stepBid: info.stepBid,
 				feeBid: info.feeBid,
-				startTime: +info.starTime,
+				startTime: +info.startTime,
 				endTime: +info.endTime
 			}
 		};
@@ -442,7 +442,7 @@ function getValidatedInfoResult(input: unknown): InfoResult | null {
 		return null;
 	}
 
-	if (typeof input.starTime !== "string") {
+	if (typeof input.startTime !== "string") {
 		return null;
 	}
 
@@ -457,7 +457,7 @@ function getValidatedInfoResult(input: unknown): InfoResult | null {
 		startBid: input.startBid,
 		stepBid: input.stepBid,
 		feeBid: input.feeBid,
-		starTime: input.starTime,
+		startTime: input.startTime,
 		endTime: input.endTime
 	};
 }

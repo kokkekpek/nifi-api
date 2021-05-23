@@ -1,5 +1,6 @@
 import { IActionsEvents } from "../actions/actions-events";
 import { Action } from "../actions/actions-types";
+import { AuctionsManager } from "../auctions/auctions-manager";
 import { AuctionStorageEntry } from "../auctions/auctions-storage";
 import { Token, TokensManager } from "../tokens/tokens-manager";
 import { Event } from "../utils/events";
@@ -28,17 +29,20 @@ export class TonActionsEvents implements IActionsEvents {
 	public readonly managerChanged = new Event<TokenManagerChangedEvent>();
 
 	private readonly tokensManager: TokensManager;
+	private readonly auctionsManager: AuctionsManager;
 	private readonly rootContract: ITonRootContract;
 	private readonly tokenContractFactory: ITonTokenContractFactory;
 	private readonly auctionContractFactory: ITonAuctionContractFactory;
 	
 	constructor(
 		tokensManager: TokensManager,
+		auctionsManager: AuctionsManager,
 		rootContract: ITonRootContract,
 		tokenContractFactory: ITonTokenContractFactory,
 		auctionContractFactory: ITonAuctionContractFactory
 	) {
 		this.tokensManager = tokensManager;
+		this.auctionsManager = auctionsManager;
 		this.rootContract = rootContract;
 		this.tokenContractFactory = tokenContractFactory;
 		this.auctionContractFactory = auctionContractFactory;
@@ -166,6 +170,8 @@ export class TonActionsEvents implements IActionsEvents {
 					this.tokensManager.setOwnerByTokenId(token.id, fullTokenInfoResult.data.owner);
 				}
 
+				let auctionErrorHappened = false;
+
 				if (token.auction?.address !== fullTokenInfoResult.data.manager) {
 					console.log("The manager of the contract", token.address, "has changed, updating");
 					console.log("New auction contract address:", fullTokenInfoResult.data.manager);
@@ -199,7 +205,43 @@ export class TonActionsEvents implements IActionsEvents {
 						);
 
 						console.log(auctionDetailsResult.error);
+
+						auctionErrorHappened = true;
 					}
+				}
+
+				if (token.auction !== null && !auctionErrorHappened) {
+					const auctionContract = this.auctionContractFactory.getAuctionContract(
+						token.auction.address
+					);
+
+					auctionContract.bidEvent.on((bidEvent) => {
+						if (token.auction === null) return;
+
+						this.auctionsManager.addBid({
+							auctionId: token.auction.auctionId,
+							bidId: bidEvent.bidId,
+							creator: bidEvent.creator,
+							token: bidEvent.token,
+							bider: bidEvent.bider,
+							value: bidEvent.value
+						});
+					});
+
+					auctionContract.finishEvent.on((finishEvent) => {
+						if (token.auction === null) return;
+
+						this.auctionsManager.setAuctionFinishBid({
+							auctionId: token.auction.auctionId,
+							bidId: finishEvent.bidId,
+							creator: finishEvent.creator,
+							token: finishEvent.token,
+							bider: finishEvent.bider,
+							value: finishEvent.value
+						});
+					});
+
+					await auctionContract.checkMessages();
 				}
 			}
 

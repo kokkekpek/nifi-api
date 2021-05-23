@@ -9,6 +9,16 @@ export class BidsStorageDatabase implements IBidsStorage {
 		this.repository = repository;
 	}
 
+	public async hasBidWithAuctionId(bidId: string): Promise<boolean> {
+		const result = await this.repository.findOne({ bid_id: bidId });
+
+		if (result !== undefined) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
 	private getStorageidByDatabaseBid(databaseBid: DatabaseBid): BidStorageEntry {
 		return {
 			bidId: databaseBid.bid_id,

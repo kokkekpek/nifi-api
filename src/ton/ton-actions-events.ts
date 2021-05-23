@@ -203,13 +203,13 @@ export class TonActionsEvents implements IActionsEvents {
 							);
 	
 							console.log(auctionDetailsResult.error);
-	
-							auctionErrorHappened = true;
 						}
+
+						auctionErrorHappened = true;
 					}
 				}
-
-				if (token.auction !== null && !auctionErrorHappened) {
+				
+				if (token.auction !== null && token.auction.finishBid === null && !auctionErrorHappened) {
 					const auctionContract = this.auctionContractFactory.getAuctionContract(
 						token.auction.address
 					);

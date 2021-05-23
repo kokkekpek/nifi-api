@@ -9,6 +9,7 @@ export type BidStorageEntry = {
 
 export interface IBidsStorage {
 	addBid(bid: BidStorageEntry): Promise<void>;
+	hasBidWithAuctionId(bidId: string): Promise<boolean>;
 	getBidsByAuctionId(auctionId: string): Promise<BidStorageEntry[]>;
 	getBidByBidId(bidId: string): Promise<BidStorageEntry | undefined>;
 }

@@ -27,6 +27,10 @@ class MockAuctionsStorage implements IAuctionsStorage {
 }
 
 class MockBidsStorage implements IBidsStorage {
+	public async hasBidWithAuctionId(): Promise<boolean> {
+		return false;
+	}
+
 	public async addBid(): Promise<void> {
 		// PASS
 	}

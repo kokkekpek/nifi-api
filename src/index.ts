@@ -88,11 +88,12 @@ async function main(): Promise<void> {
 	const tonClient = new TonClient({ network: { server_address: config.ton.serverAddress } });
 	const tonClientRootContract = new TonClientRootContract(tonClient, config.ton.rootContractAddress);
 	const tonClientTokenContractFactory = new TonClientTokenContractFactory(tonClient);
-	const tonClientAuctionContractFactory = new TonClientAuctionContractFactory(tonClient);
+	const tonClientAuctionContractFactory = new TonClientAuctionContractFactory(auctionsStorage, tonClient);
 
 	console.log("TON Event Provider initialization...");
 	const tonActionsEvents = new TonActionsEvents(
 		tokensManager,
+		auctionsManager,
 		tonClientRootContract,
 		tonClientTokenContractFactory,
 		tonClientAuctionContractFactory

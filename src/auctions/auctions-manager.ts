@@ -36,6 +36,11 @@ export class AuctionsManager {
 		this.bidsStorage = bidsStorage;
 	}
 
+	public async setAuctionFinishBid(finishBid: BidStorageEntry): Promise<void> {
+		await this.addBid(finishBid);
+		await this.storage.setAuctionFinishBid(finishBid.auctionId, finishBid.bidId);
+	}
+
 	public async addBid(bid: BidStorageEntry): Promise<AddBidResult> {
 		const mutexName = "saving_bid_" + bid.bidId;
 		await mutexLockOrAwait(mutexName);

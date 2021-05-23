@@ -21,7 +21,7 @@ export type Auction = {
 	readonly startTime: number;
 	readonly endTime: number;
 	readonly bids: AuctionBid[];
-	finishBid?: AuctionBid;
+	finishBid: AuctionBid | null;
 };
 
 export type AddAuctionResult = "success" | "auction_with_such_id_already_exists";
@@ -94,6 +94,7 @@ export class AuctionsManager {
 			feeBid: storageEntry.feeBid,
 			startTime: storageEntry.startTime,
 			endTime: storageEntry.endTime,
+			finishBid: null,
 			bids
 		};
 
@@ -106,7 +107,7 @@ export class AuctionsManager {
 				finishBid = await this.bidsStorage.getBidByBidId(storageEntry.finishBid);
 			}
 
-			auction.finishBid = finishBid;
+			auction.finishBid = finishBid || null;
 		}
 
 		return auction;

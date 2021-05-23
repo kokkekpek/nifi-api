@@ -23,6 +23,7 @@ type InfoResult = {
 	readonly id: string;
 	readonly publicKey: string;
 	readonly owner: string;
+	readonly manager: string;
 };
 
 type BocResult = {
@@ -273,10 +274,15 @@ function getValidatedInfoResult(input: unknown): InfoResult | null {
 		return null;
 	}
 
+	if (typeof input.manager !== "string") {
+		return null;
+	}
+
 	return {
 		id: input.id,
 		owner: input.owner,
-		publicKey: input.publicKey
+		publicKey: input.publicKey,
+		manager: input.manager
 	};
 }
 

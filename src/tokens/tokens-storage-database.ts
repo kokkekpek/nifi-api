@@ -1,6 +1,5 @@
 import { Repository } from "typeorm";
-import { Token } from "./tokens-manager";
-import { ITokensStorage } from "./tokens-storage";
+import { ITokensStorage, TokenStorageEntry } from "./tokens-storage";
 import { DatabaseToken } from "../database/models/token";
 
 export class TokensStorageDatabase implements ITokensStorage {
@@ -20,7 +19,7 @@ export class TokensStorageDatabase implements ITokensStorage {
 		}
 	}
 
-	public async addToken(record: Token): Promise<void> {
+	public async addToken(record: TokenStorageEntry): Promise<void> {
 		const databaseToken = new DatabaseToken(
 			record.id,
 			record.address,
@@ -33,18 +32,18 @@ export class TokensStorageDatabase implements ITokensStorage {
 		await this.repository.insert(databaseToken);
 	}
 
-	private getTokenByDatabaseToken(databaseToken: DatabaseToken): Token {
+	private getTokenByDatabaseToken(databaseToken: DatabaseToken): TokenStorageEntry {
 		return {
 			id: databaseToken.tokenId,
 			address: databaseToken.address,
 			userPublicKey: databaseToken.user_public_key,
 			owner: databaseToken.owner,
 			hash: databaseToken.hash,
-			auction: null
+			auctionId: databaseToken.auction_id || undefined
 		};
 	}
 
-	public async getTokenById(tokenId: string): Promise<Token | undefined> {
+	public async getTokenById(tokenId: string): Promise<TokenStorageEntry | undefined> {
 		const databaseToken = await this.repository.findOne({ tokenId });
 
 		if (!databaseToken) return;
@@ -52,17 +51,17 @@ export class TokensStorageDatabase implements ITokensStorage {
 		return this.getTokenByDatabaseToken(databaseToken);
 	}
 
-	public async getAllTokens(): Promise<Token[]> {
+	public async getAllTokens(): Promise<TokenStorageEntry[]> {
 		const databaseTokens = await this.repository.find();
 		return databaseTokens.map(this.getTokenByDatabaseToken);
 	}
 
-	public async getTokensByUserPublicKey(userPublicKey: string): Promise<Token[]> {
+	public async getTokensByUserPublicKey(userPublicKey: string): Promise<TokenStorageEntry[]> {
 		const databaseTokens = await this.repository.find({ user_public_key: userPublicKey });
 		return databaseTokens.map(this.getTokenByDatabaseToken);
 	}
 
-	public async getTokensByOwner(owner: string): Promise<Token[]> {
+	public async getTokensByOwner(owner: string): Promise<TokenStorageEntry[]> {
 		const databaseTokens = await this.repository.find({ owner });
 		return databaseTokens.map(this.getTokenByDatabaseToken);
 	}

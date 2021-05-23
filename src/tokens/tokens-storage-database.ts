@@ -38,7 +38,8 @@ export class TokensStorageDatabase implements ITokensStorage {
 			address: databaseToken.address,
 			userPublicKey: databaseToken.user_public_key,
 			owner: databaseToken.owner,
-			hash: databaseToken.hash
+			hash: databaseToken.hash,
+			auction: null
 		};
 	}
 

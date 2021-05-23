@@ -64,7 +64,7 @@ export class TonActionsEvents implements IActionsEvents {
 			return artInfoResult;
 		}
 
-		const floodLimitsPreventiveDelayMs = 500;
+		const floodLimitsPreventiveDelayMs = 50;
 		await timeout(floodLimitsPreventiveDelayMs);
 
 		const infoResult = await tokenContract.getInfo();
@@ -120,7 +120,7 @@ export class TonActionsEvents implements IActionsEvents {
 			const tokens = await this.tokensManager.getAllTokens();
 
 			for (const token of tokens) {
-				const floodLimitsPreventiveDelayMs = 1000;
+				const floodLimitsPreventiveDelayMs = 50;
 				await timeout(floodLimitsPreventiveDelayMs);
 
 				const tokenContract = this.tokenContractFactory.getTokenContract(token.address);
@@ -173,9 +173,6 @@ export class TonActionsEvents implements IActionsEvents {
 				let auctionErrorHappened = false;
 
 				if (token.auction?.address !== fullTokenInfoResult.data.manager) {
-					console.log("The manager of the contract", token.address, "has changed, updating");
-					console.log("New auction contract address:", fullTokenInfoResult.data.manager);
-
 					const auctionContract = this.auctionContractFactory.getAuctionContract(
 						fullTokenInfoResult.data.manager
 					);
@@ -197,16 +194,18 @@ export class TonActionsEvents implements IActionsEvents {
 
 						this.tokensManager.setAuctionByTokenId(token.id, auction);
 					} else {
-						console.log(
-							"Failed to get detailed information about auction:",
-							fullTokenInfoResult.data.manager,
-							"for token",
-							token.address
-						);
-
-						console.log(auctionDetailsResult.error);
-
-						auctionErrorHappened = true;
+						if (!auctionDetailsResult.error.message?.includes("Replay protection exception")) {
+							console.log(
+								"Failed to get detailed information about auction:",
+								fullTokenInfoResult.data.manager,
+								"for token",
+								token.address
+							);
+	
+							console.log(auctionDetailsResult.error);
+	
+							auctionErrorHappened = true;
+						}
 					}
 				}
 
@@ -245,7 +244,7 @@ export class TonActionsEvents implements IActionsEvents {
 				}
 			}
 
-			const floodLimitsPreventiveDelayMs = 1000;
+			const floodLimitsPreventiveDelayMs = 50;
 			await timeout(floodLimitsPreventiveDelayMs);
 		}
 	}

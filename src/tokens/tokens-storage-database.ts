@@ -24,6 +24,7 @@ export class TokensStorageDatabase implements ITokensStorage {
 		const databaseToken = new DatabaseToken(
 			record.id,
 			record.address,
+			null,
 			record.userPublicKey,
 			record.owner,
 			record.hash
@@ -75,6 +76,12 @@ export class TokensStorageDatabase implements ITokensStorage {
 	public async setHashByTokenId(tokenId: string, newHash: string): Promise<void> {
 		await this.repository.update({ tokenId }, {
 			hash: newHash
+		});
+	}
+
+	public async setAuctionIdByTokenId(tokenId: string, auctionId: string): Promise<void> {
+		await this.repository.update({ tokenId }, {
+			auction_id: auctionId
 		});
 	}
 }

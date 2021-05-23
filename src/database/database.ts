@@ -6,6 +6,7 @@ import { DatabaseActionChangeOwner } from "./models/action-change-owner";
 import { DatabaseActionCreateToken } from "./models/action-create-token";
 import { DatabaseActionSetHash } from "./models/action-set-hash";
 import { DatabaseAuction } from "./models/auction";
+import { DatabaseBid } from "./models/bid";
 import { DatabaseToken } from "./models/token";
 
 
@@ -43,7 +44,8 @@ export async function createDatabase(config: MysqlConfig): Promise<Connection> {
 			DatabaseActionChangeOwner,
 			DatabaseActionSetHash,
 			DatabaseActionCreateToken,
-			DatabaseAuction
+			DatabaseAuction,
+			DatabaseBid
 		]
 	});
 

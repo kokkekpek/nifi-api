@@ -5,10 +5,12 @@ import {
 } from "./ton-auction-contract";
 
 import * as fs from "fs";
-import { Abi, ResultOfRunTvm, TonClient } from "@tonclient/core";
+import { Abi, DecodedMessageBody, ResultOfRunTvm, SortDirection, TonClient } from "@tonclient/core";
 import { AuctionBid } from "../auctions/auctions-manager";
 import { Event } from "../utils/events";
 import { RgResult } from "../utils/result";
+import { ITonMessagesCheckerStorage } from "./ton-messages-checker-storage";
+import { timeout } from "../utils/timeout";
 
 const DIRECT_AUCTION_ABI: Abi = {
 	type: "Contract",
@@ -17,6 +19,22 @@ const DIRECT_AUCTION_ABI: Abi = {
 
 type BocResult = {
 	readonly boc: string;
+};
+
+type EncodedMessage = {
+	readonly body: string;
+	readonly created_at: number;
+	readonly dst_transaction: {
+		readonly aborted: boolean;
+		readonly id: string;
+	};
+};
+
+type DecodedMessage = {
+	readonly name: string;
+	readonly encodedMessage: EncodedMessage;
+	readonly body: Record<string, unknown>;
+	readonly createdAt: number;
 };
 
 type InfoResult = {
@@ -30,28 +48,184 @@ type InfoResult = {
 	readonly endTime: string;
 };
 
+type BidEventMessage = {
+	readonly id: string;
+	readonly creator: string;
+	readonly token: string;
+	readonly bider: string;
+	readonly value: string;
+};
+
 export class TonClientAuctionContractFactory implements ITonAuctionContractFactory {
+	private readonly storage: ITonMessagesCheckerStorage;
 	private readonly tonClient: TonClient;
 
-	constructor(tonClient: TonClient) {
+	constructor(storage: ITonMessagesCheckerStorage, tonClient: TonClient) {
+		this.storage = storage;
 		this.tonClient = tonClient;
 	}
 
 	public getAuctionContract(addr: string): ITonAuctionContract {
-		return new TonClientAuctionContract(this.tonClient, addr);
+		return new TonClientAuctionContract(this.storage, this.tonClient, addr);
 	}
 }
 
 export class TonClientAuctionContract implements ITonAuctionContract {
+	private readonly storage: ITonMessagesCheckerStorage;
+
 	public readonly bidEvent = new Event<AuctionBid>();
 	public readonly finishEvent = new Event<AuctionBid>();
 
 	private readonly tonClient: TonClient;
 	private readonly address: string;
 
-	constructor(tonClient: TonClient, address: string) {
+	constructor(storage: ITonMessagesCheckerStorage, tonClient: TonClient, address: string) {
+		this.storage = storage;
 		this.tonClient = tonClient;
 		this.address = address;
+	}
+
+	private getBidByMessageBidEvent(messageBidEvent: BidEventMessage): AuctionBid {
+		return {
+			bidId: messageBidEvent.id,
+			...messageBidEvent
+		};
+	}
+
+	public async checkMessages(): Promise<void> {
+		const messagesResult = await this.getMessages();
+
+		if (!messagesResult.is_success) {
+			console.log("Failed to get auction messages:");
+			console.log(messagesResult.error);
+
+			const delayBeforeRetryAfterError = 3000;
+			await timeout(delayBeforeRetryAfterError);
+
+			return;
+		}
+
+		let total = 0;
+		let unvalidatedEvents = 0;
+		let validatedEvents = 0;
+
+		for (const message of messagesResult.data) {
+			if (message.name !== "BidEvent" && message.name !== "FinishEvent") continue;
+
+			total++;
+
+			const bidEventMessage = getValidatedBidEventMessage(message.body);
+
+			if (bidEventMessage === null) {
+				unvalidatedEvents++;
+				continue;
+			}
+
+			validatedEvents++;
+
+			switch (message.name) {
+				case "BidEvent":
+					this.bidEvent.emit(this.getBidByMessageBidEvent(bidEventMessage));
+					break;
+				case "FinishEvent":
+					this.finishEvent.emit(this.getBidByMessageBidEvent(bidEventMessage));
+					break;
+			}
+		}
+
+		console.log("Auction contract", this.address, "checked", total, "messages");
+		console.log("Unvalidated:", unvalidatedEvents, "validated:", validatedEvents);
+	}
+
+	private async getMessages(): Promise<RgResult<DecodedMessage[], number>> {
+		let result: unknown[];
+
+		const lastMessageTime = await this.storage.getLastMessageTimeByAddress(this.address) || 0;
+
+		try {
+			const queryCollectionResult = await this.tonClient.net.query_collection({
+				collection: "messages",
+				order: [
+					{
+						path: "created_at",
+						direction: SortDirection.ASC
+					}
+				],
+				filter: {
+					created_at: { gt: lastMessageTime },
+					src: { eq: this.address }
+				},
+				result: "body created_at dst_transaction { aborted, id }",
+				limit: 100
+			});
+
+			result = queryCollectionResult.result;
+		} catch (err) {
+			return {
+				is_success: false,
+				error: {
+					code: -1,
+					message: err.message
+				}
+			};
+		}
+
+		const encodedMessages: EncodedMessage[] = [];
+
+		for (const entry of result) {
+			const encodedMessage = getValidatedEncodedMessage(entry);
+
+			if (encodedMessage === null) {
+				continue;
+			}
+
+			encodedMessages.push(encodedMessage);
+		}
+
+		const lastEncodedMessage = encodedMessages[encodedMessages.length - 1];
+		if (lastEncodedMessage !== undefined) {
+			await this.storage.setLastMessageTimeByAddress(
+				this.address,
+				lastEncodedMessage.created_at
+			);
+		}
+
+		const decodedMessages: DecodedMessage[] = [];
+
+		for (const encodedMessage of encodedMessages) {
+			if (encodedMessage.dst_transaction.aborted) {
+				continue;
+			}
+
+			let decoded: DecodedMessageBody;
+
+			try {
+				decoded = await this.tonClient.abi.decode_message_body({
+					abi: DIRECT_AUCTION_ABI,
+					body: encodedMessage.body,
+					is_internal: true
+				});
+			} catch (err) {
+				continue;
+			}
+
+			
+			if (!decoded.value) {
+				continue;
+			}
+
+			decodedMessages.push({
+				name: decoded.name,
+				encodedMessage,
+				body: decoded.value,
+				createdAt: encodedMessage.created_at
+			});
+		}
+
+		return {
+			is_success: true,
+			data: decodedMessages
+		};
 	}
 
 	public async getInfo(): Promise<RgResult<TonAuctionContractGetInfoResult, number>> {
@@ -283,5 +457,74 @@ function getValidatedInfoResult(input: unknown): InfoResult | null {
 		feeBid: input.feeBid,
 		startTime: input.startTime,
 		endTime: input.endTime
+	};
+}
+
+function getValidatedEncodedMessage(input: unknown): EncodedMessage | null {
+	if (!isStruct(input)) {
+		return null;
+	}
+
+	if (typeof input.body !== "string") {
+		return null;
+	}
+
+	if (typeof input.created_at !== "number") {
+		return null;
+	}
+
+	if (!isStruct(input.dst_transaction)) {
+		return null;
+	}
+
+	if (typeof input.dst_transaction.aborted !== "boolean") {
+		return null;
+	}
+
+	if (typeof input.dst_transaction.id !== "string") {
+		return null;
+	}
+
+	return {
+		body: input.body,
+		created_at: input.created_at,
+		dst_transaction: {
+			aborted: input.dst_transaction.aborted,
+			id: input.dst_transaction.id
+		}
+	};
+}
+
+function getValidatedBidEventMessage(input: unknown): BidEventMessage | null {
+	if (!isStruct(input)) {
+		return null;
+	}
+
+	if (typeof input.id !== "string") {
+		return null;
+	}
+
+	if (typeof input.creator !== "string") {
+		return null;
+	}
+
+	if (typeof input.token !== "string") {
+		return null;
+	}
+
+	if (typeof input.bider !== "string") {
+		return null;
+	}
+
+	if (typeof input.value !== "string") {
+		return null;
+	}
+
+	return {
+		id: input.id,
+		creator: input.creator,
+		token: input.token,
+		bider: input.bider,
+		value: input.value
 	};
 }

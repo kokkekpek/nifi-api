@@ -1,12 +1,27 @@
 import { Repository } from "typeorm";
 import { DatabaseAuction } from "../database/models/auction";
+import { ITonMessagesCheckerStorage } from "../ton/ton-messages-checker-storage";
 import { AuctionStorageEntry, IAuctionsStorage } from "./auctions-storage";
 
-export class AuctionsStorageDatabase implements IAuctionsStorage {
+export class AuctionsStorageDatabase implements IAuctionsStorage, ITonMessagesCheckerStorage {
 	private repository: Repository<DatabaseAuction>;
 
 	constructor(repository: Repository<DatabaseAuction>) {
 		this.repository = repository;
+	}
+
+	public async setLastMessageTimeByAddress(address: string, lastMessageTime: number): Promise<void> {
+		await this.repository.update({ address }, {
+			last_message_time: lastMessageTime
+		});
+	}
+
+	public async getLastMessageTimeByAddress(address: string): Promise<number | undefined> {
+		const result = await this.repository.findOne({ address });
+
+		if (!result) return;
+
+		return result.last_message_time;
 	}
 
 	private getActionStorageEntryByDatabaseEntry(databaseEntry: DatabaseAuction): AuctionStorageEntry {
@@ -53,6 +68,7 @@ export class AuctionsStorageDatabase implements IAuctionsStorage {
 			auction.feeBid,
 			auction.startTime,
 			auction.endTime,
+			0,
 			auction.finishBid || null
 		);
 

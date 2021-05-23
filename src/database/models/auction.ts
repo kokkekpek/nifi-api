@@ -17,6 +17,7 @@ export class DatabaseAuction {
 	auction_id: string;
 
 	@Column({ length: 255, type: "varchar" })
+	@Index()
 	address: string;
 
 	@Column({ length: 255, type: "varchar" })
@@ -42,6 +43,9 @@ export class DatabaseAuction {
 	@Column({ type: "int", unsigned: true })
 	end_time: number;
 
+	@Column({ type: "int", unsigned: true })
+	last_message_time: number;
+
 	@Column({ length: 255, type: "varchar", nullable: true })
 	finish_bid: string | null;
 
@@ -55,6 +59,7 @@ export class DatabaseAuction {
 		feeBid: string,
 		startTime: number,
 		endTime: number,
+		lastMessageTime: number,
 		finishBid: string | null
 	) {
 		this.address = address;
@@ -66,6 +71,7 @@ export class DatabaseAuction {
 		this.fee_bid = feeBid;
 		this.start_time = startTime;
 		this.end_time = endTime;
+		this.last_message_time = lastMessageTime;
 		this.finish_bid = finishBid;
 	}
 }

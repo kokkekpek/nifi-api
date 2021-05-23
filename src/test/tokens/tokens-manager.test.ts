@@ -3,7 +3,7 @@ import { Token, TokensManager } from "../../tokens/tokens-manager";
 import { TokensStorageDatabase } from "../../tokens/tokens-storage-database";
 import { DatabaseToken } from "../../database/models/token";
 import { AuctionStorageEntry, IAuctionsStorage } from "../../auctions/auctions-storage";
-import { IBidsStorage } from "../../auctions/bids-storage";
+import { BidStorageEntry, IBidsStorage } from "../../auctions/bids-storage";
 import { AuctionBid, AuctionsManager } from "../../auctions/auctions-manager";
 
 let tokensManager: TokensManager;
@@ -27,15 +27,15 @@ class MockAuctionsStorage implements IAuctionsStorage {
 }
 
 class MockBidsStorage implements IBidsStorage {
-	public async addBid(bid: AuctionBid): Promise<void> {
+	public async addBid(bid: BidStorageEntry): Promise<void> {
 		// PASS
 	}
 
-	public async getBidsByAuctionId(auctionId: string): Promise<AuctionBid[]> {
+	public async getBidsByAuctionId(auctionId: string): Promise<BidStorageEntry[]> {
 		return [];
 	}
 
-	public async getBidByBidId(bidId: string): Promise<AuctionBid | undefined> {
+	public async getBidByBidId(bidId: string): Promise<BidStorageEntry | undefined> {
 		return;
 	}
 }

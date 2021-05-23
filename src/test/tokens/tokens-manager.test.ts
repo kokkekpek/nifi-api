@@ -4,38 +4,38 @@ import { TokensStorageDatabase } from "../../tokens/tokens-storage-database";
 import { DatabaseToken } from "../../database/models/token";
 import { AuctionStorageEntry, IAuctionsStorage } from "../../auctions/auctions-storage";
 import { BidStorageEntry, IBidsStorage } from "../../auctions/bids-storage";
-import { AuctionBid, AuctionsManager } from "../../auctions/auctions-manager";
+import { AuctionsManager } from "../../auctions/auctions-manager";
 
 let tokensManager: TokensManager;
 
 class MockAuctionsStorage implements IAuctionsStorage {
-	public async getAuctionByAuctionId(auctionId: string): Promise<AuctionStorageEntry | undefined> {
+	public async getAuctionByAuctionId(): Promise<AuctionStorageEntry | undefined> {
 		return;
 	}
 
-	public async hasAuctionWithAuctionId(auctionId: string): Promise<boolean> {
+	public async hasAuctionWithAuctionId(): Promise<boolean> {
 		return false;
 	}
 
-	public async addAuction(auction: AuctionStorageEntry): Promise<void> {
+	public async addAuction(): Promise<void> {
 		// PASS
 	}
 
-	public async setAuctionFinishBid(auctionId: string, finishBid: string): Promise<void> {
+	public async setAuctionFinishBid(): Promise<void> {
 		// PASS
 	}
 }
 
 class MockBidsStorage implements IBidsStorage {
-	public async addBid(bid: BidStorageEntry): Promise<void> {
+	public async addBid(): Promise<void> {
 		// PASS
 	}
 
-	public async getBidsByAuctionId(auctionId: string): Promise<BidStorageEntry[]> {
+	public async getBidsByAuctionId(): Promise<BidStorageEntry[]> {
 		return [];
 	}
 
-	public async getBidByBidId(bidId: string): Promise<BidStorageEntry | undefined> {
+	public async getBidByBidId(): Promise<BidStorageEntry | undefined> {
 		return;
 	}
 }

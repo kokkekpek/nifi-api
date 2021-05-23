@@ -1,5 +1,3 @@
-import { Auction, AuctionBid } from "./auctions-manager";
-
 export type BidStorageEntry = {
 	readonly bidId: string;
 	readonly auctionId: string;

@@ -148,8 +148,7 @@ async function checkLogsDirectory(): Promise<void> {
 
 	isDirectoryChecked = true;
 
-	const directory: string[] | undefined = await getDirectory(LOGS_DIRECTORY);
-
+	await getDirectory(LOGS_DIRECTORY);
 	await getDirectory(ERRORS_DIRECTORY);
 	await getDirectory(WARNINGS_DIRECTORY);
 }

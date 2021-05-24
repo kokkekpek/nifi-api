@@ -209,9 +209,6 @@ export class TonClientRootOffersContract implements ITonRootOffersContract {
 		const validatedBoc = getValidatedBocResult(result[0]);
 
 		if (!validatedBoc) {
-			console.log("Validation fault for attempt to get BOC for offers root contract");
-			console.log(result[0]);
-
 			return {
 				is_success: false,
 				error: {

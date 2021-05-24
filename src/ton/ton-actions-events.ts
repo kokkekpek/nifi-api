@@ -2,11 +2,14 @@ import { IActionsEvents } from "../actions/actions-events";
 import { Action } from "../actions/actions-types";
 import { AuctionsManager } from "../auctions/auctions-manager";
 import { AuctionStorageEntry } from "../auctions/auctions-storage";
+import { OffersManager } from "../offers/offers-manager";
 import { Token, TokensManager } from "../tokens/tokens-manager";
 import { Event } from "../utils/events";
 import { RgResult } from "../utils/result";
 import { timeout } from "../utils/timeout";
 import { ITonAuctionContractFactory } from "./ton-auctions/ton-auction-contract";
+import { ITonOfferContractFactory } from "./ton-offers/ton-offer-contract";
+import { ITonRootOffersContract, TonOfferCreatedEvent } from "./ton-offers/ton-root-offers-contract";
 import { ITonRootContract, TonContractTokenCreatedEvent } from "./ton-tokens/ton-root-contract";
 import { ITonTokenContract, ITonTokenContractFactory } from "./ton-tokens/ton-token-contract";
 
@@ -30,24 +33,36 @@ export class TonActionsEvents implements IActionsEvents {
 
 	private readonly tokensManager: TokensManager;
 	private readonly auctionsManager: AuctionsManager;
+	private readonly offersManager: OffersManager;
+
 	private readonly rootContract: ITonRootContract;
 	private readonly tokenContractFactory: ITonTokenContractFactory;
 	private readonly auctionContractFactory: ITonAuctionContractFactory;
+
+	private readonly offersRootContract: ITonRootOffersContract;
+	private readonly offerContractFactory: ITonOfferContractFactory;
 	
 	constructor(
 		tokensManager: TokensManager,
 		auctionsManager: AuctionsManager,
+		offersManager: OffersManager,
 		rootContract: ITonRootContract,
 		tokenContractFactory: ITonTokenContractFactory,
-		auctionContractFactory: ITonAuctionContractFactory
+		auctionContractFactory: ITonAuctionContractFactory,
+		offersRootContract: ITonRootOffersContract,
+		offerContractFactory: ITonOfferContractFactory
 	) {
 		this.tokensManager = tokensManager;
 		this.auctionsManager = auctionsManager;
+		this.offersManager = offersManager;
 		this.rootContract = rootContract;
 		this.tokenContractFactory = tokenContractFactory;
 		this.auctionContractFactory = auctionContractFactory;
+		this.offersRootContract = offersRootContract;
+		this.offerContractFactory = offerContractFactory;
 
 		this.rootContract.created.on(this.onTokenCreated.bind(this));
+		this.offersRootContract.created.on(this.onOfferContract.bind(this));
 
 		this.tokenContractsLoop();
 	}
@@ -86,6 +101,32 @@ export class TonActionsEvents implements IActionsEvents {
 				manager: infoResult.data.manager
 			}
 		};
+	}
+
+	private async onOfferContract(event: TonOfferCreatedEvent): Promise<void> {
+		console.log("Received offer creation event from root contract:\n", event);
+
+		console.log("Receiving detailed information about the contract", event.addr);
+		const offerContract = this.offerContractFactory.getOfferContract(event.addr);
+		const info = await offerContract.getInfo();
+
+		if (!info.is_success) {
+			console.log("Failed to get detailed information about the offer contract", event.addr, "skipped");
+			return;
+		}
+
+		this.offersManager.addOffer({
+			address: event.addr,
+			offerId: info.data.id,
+			creator: info.data.creator,
+			token: info.data.token,
+			price: info.data.price,
+			fee: info.data.fee,
+			endTime: info.data.endTime,
+			status: "pending"
+		});
+
+		this.offersRootContract.updateLastOfferId();
 	}
 
 	private async onTokenCreated(event: TonContractTokenCreatedEvent): Promise<void> {
@@ -241,6 +282,22 @@ export class TonActionsEvents implements IActionsEvents {
 					});
 
 					await auctionContract.checkMessages();
+				}
+
+				const offers = await this.offersManager.getOffersByTokenId(token.id, "pending");
+
+				for (const offer of offers) {
+					const offerContract = this.offerContractFactory.getOfferContract(offer.address);
+
+					offerContract.offerAcceptedEvent.on(() => {
+						this.offersManager.setOfferStatus(offer.offerId, "accepted");
+					});
+
+					offerContract.offerFinishedEvent.on(() => {
+						this.offersManager.setOfferStatus(offer.offerId, "expired");
+					});
+
+					await offerContract.checkMessages();
 				}
 			}
 

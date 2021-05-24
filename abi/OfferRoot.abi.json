@@ -1,0 +1,152 @@
+{
+	"ABI version": 2,
+	"header": ["time"],
+	"functions": [
+		{
+			"name": "constructor",
+			"inputs": [
+				{"name":"manager","type":"address"},
+				{"name":"creationMinValue","type":"uint128"},
+				{"name":"creationFee","type":"uint128"},
+				{"name":"creationAndStorageFee","type":"uint128"},
+				{"name":"name","type":"bytes"},
+				{"name":"symbol","type":"bytes"},
+				{"name":"tokenCode","type":"cell"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "create",
+			"inputs": [
+				{"name":"creator","type":"address"},
+				{"name":"token","type":"address"},
+				{"name":"price","type":"uint128"},
+				{"name":"endTime","type":"uint32"}
+			],
+			"outputs": [
+				{"name":"addr","type":"address"}
+			]
+		},
+		{
+			"name": "receiveTokenAddress",
+			"inputs": [
+				{"name":"_answer_id","type":"uint32"},
+				{"name":"id","type":"uint128"}
+			],
+			"outputs": [
+				{"name":"addr","type":"address"}
+			]
+		},
+		{
+			"name": "getTokenAddress",
+			"inputs": [
+				{"name":"id","type":"uint128"}
+			],
+			"outputs": [
+				{"name":"addr","type":"address"}
+			]
+		},
+		{
+			"name": "withdraw",
+			"inputs": [
+				{"name":"addr","type":"address"},
+				{"name":"value","type":"uint128"},
+				{"name":"bounce","type":"bool"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "setCreationFee",
+			"inputs": [
+				{"name":"minValue","type":"uint128"},
+				{"name":"fee","type":"uint128"},
+				{"name":"storageFee","type":"uint128"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "receiveCreationFee",
+			"inputs": [
+				{"name":"_answer_id","type":"uint32"}
+			],
+			"outputs": [
+				{"name":"minValue","type":"uint128"},
+				{"name":"fee","type":"uint128"},
+				{"name":"storageFee","type":"uint128"}
+			]
+		},
+		{
+			"name": "getCreationFee",
+			"inputs": [
+			],
+			"outputs": [
+				{"name":"minValue","type":"uint128"},
+				{"name":"fee","type":"uint128"},
+				{"name":"storageFee","type":"uint128"}
+			]
+		},
+		{
+			"name": "changeManager",
+			"inputs": [
+				{"name":"manager","type":"address"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "receiveManager",
+			"inputs": [
+				{"name":"_answer_id","type":"uint32"}
+			],
+			"outputs": [
+				{"name":"manager","type":"address"}
+			]
+		},
+		{
+			"name": "getManager",
+			"inputs": [
+			],
+			"outputs": [
+				{"name":"manager","type":"address"}
+			]
+		},
+		{
+			"name": "receiveInfo",
+			"inputs": [
+				{"name":"_answer_id","type":"uint32"}
+			],
+			"outputs": [
+				{"name":"name","type":"bytes"},
+				{"name":"symbol","type":"bytes"},
+				{"name":"totalSupply","type":"uint128"},
+				{"name":"publicKey","type":"uint256"}
+			]
+		},
+		{
+			"name": "getInfo",
+			"inputs": [
+			],
+			"outputs": [
+				{"name":"name","type":"bytes"},
+				{"name":"symbol","type":"bytes"},
+				{"name":"totalSupply","type":"uint128"},
+				{"name":"publicKey","type":"uint256"}
+			]
+		},
+		{
+			"name": "getTokenCode",
+			"inputs": [
+			],
+			"outputs": [
+				{"name":"code","type":"cell"}
+			]
+		}
+	],
+	"data": [
+	],
+	"events": [
+	]
+}

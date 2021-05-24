@@ -8,6 +8,7 @@ logs
 ormconfig.json
 last_message_time
 last_token_id
+last_offer_id
 config.json
 config/config.json
 config/nginx/nginx.conf

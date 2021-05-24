@@ -2,9 +2,16 @@ import * as fs from "fs";
 import { Abi, DecodedMessageBody, ResultOfRunTvm, SortDirection, TonClient } from "@tonclient/core";
 import { Event } from "../../utils/events";
 import { ITonMessagesCheckerStorage } from "../ton-messages-checker-storage";
-import { ITonOfferContract, ITonOfferContractFactory, TonOfferContractGetInfoResult } from "./ton-offer-contract";
+import { 
+	ITonOfferContract, 
+	ITonOfferContractFactory, 
+	TonOfferContractGetInfoResult, 
+	TonOfferCreatedEvent 
+} from "./ton-offer-contract";
 import { RgResult } from "../../utils/result";
 import { timeout } from "../../utils/timeout";
+import { OffersManager } from "../../offers/offers-manager";
+import { TokensManager } from "../../tokens/tokens-manager";
 
 const OFFER_ABI: Abi = {
 	type: "Contract",
@@ -43,14 +50,29 @@ type InfoResult = {
 export class TonClientOfferContractFactory implements ITonOfferContractFactory {
 	private readonly storage: ITonMessagesCheckerStorage;
 	private readonly tonClient: TonClient;
+	private readonly offersManager: OffersManager;
+	private readonly tokensManager: TokensManager;
 
-	constructor(storage: ITonMessagesCheckerStorage, tonClient: TonClient) {
+	constructor(
+		storage: ITonMessagesCheckerStorage,
+		tonClient: TonClient,
+		offersManager: OffersManager,
+		tokensManager: TokensManager
+	) {
 		this.storage = storage;
 		this.tonClient = tonClient;
+		this.offersManager = offersManager;
+		this.tokensManager = tokensManager;
 	}
 
 	public getOfferContract(addr: string): ITonOfferContract {
-		return new TonClientOfferContract(this.storage, this.tonClient, addr);
+		return new TonClientOfferContract(
+			this.storage,
+			this.tonClient,
+			this.offersManager,
+			this.tokensManager,
+			addr
+		);
 	}
 }
 
@@ -63,9 +85,20 @@ export class TonClientOfferContract implements ITonOfferContract {
 	private readonly tonClient: TonClient;
 	private readonly address: string;
 
-	constructor(storage: ITonMessagesCheckerStorage, tonClient: TonClient, address: string) {
+	private readonly offersManager: OffersManager;
+	private readonly tokensManager: TokensManager;
+
+	constructor(
+		storage: ITonMessagesCheckerStorage,
+		tonClient: TonClient,
+		offersManager: OffersManager,
+		tokensManager: TokensManager,
+		address: string
+	) {
 		this.storage = storage;
 		this.tonClient = tonClient;
+		this.offersManager = offersManager;
+		this.tokensManager = tokensManager;
 		this.address = address;
 	}
 
@@ -73,7 +106,7 @@ export class TonClientOfferContract implements ITonOfferContract {
 		const messagesResult = await this.getMessages();
 
 		if (!messagesResult.is_success) {
-			console.log("Failed to get auction messages:");
+			console.log("Failed to get offer messages:");
 			console.log(messagesResult.error);
 
 			const delayBeforeRetryAfterError = 3000;
@@ -86,12 +119,38 @@ export class TonClientOfferContract implements ITonOfferContract {
 		let validatedEvents = 0;
 
 		for (const message of messagesResult.data) {
-			if (message.name !== "OfferAccepted" && message.name !== "OfferFinished") continue;
+			// eslint-disable-next-line max-len
+			if (message.name !== "OfferAccepted" && message.name !== "OfferFinished" && message.name !== "OfferCreated") continue;
 
 			total++;
 			validatedEvents++;
 
 			switch (message.name) {
+				case "OfferCreated": {
+					const createdEvent = getValidatedCreatedEventMessage(message.body);
+					if (!createdEvent) {
+						break;
+					}
+
+					const token = await this.tokensManager.getTokenByAddress(createdEvent.token);
+					if (!token) {
+						break;
+					}
+
+					this.offersManager.addOffer({
+						offerId: createdEvent.id,
+						tokenId: token.id,
+						token: createdEvent.token,
+						price: createdEvent.price,
+						creator: createdEvent.creator,
+						fee: "0",
+						endTime: "0",
+						status: "pending",
+						address: this.address
+					});
+
+					break;
+				}
 				case "OfferAccepted":
 					this.offerAcceptedEvent.emit();
 					break;
@@ -270,7 +329,7 @@ export class TonClientOfferContract implements ITonOfferContract {
 		const validatedBoc = getValidatedBocResult(result[0]);
 
 		if (!validatedBoc) {
-			console.log("Validation fault for attempt to get BOC for address", this.address);
+			console.log("Validation fault for attempt to get offer BOC for address", this.address);
 			console.log(result[0]);
 
 			return {
@@ -415,6 +474,35 @@ function getValidatedInfoResult(input: unknown): InfoResult | null {
 		price: input.price,
 		fee: input.fee,
 		endTime: input.endTime
+	};
+}
+
+function getValidatedCreatedEventMessage(input: unknown): TonOfferCreatedEvent | null {
+	if (!isStruct(input)) {
+		return null;
+	}
+
+	if (typeof input.id !== "string") {
+		return null;
+	}
+
+	if (typeof input.creator !== "string") {
+		return null;
+	}
+
+	if (typeof input.token !== "string") {
+		return null;
+	}
+
+	if (typeof input.price !== "string") {
+		return null;
+	}
+
+	return {
+		id: input.id,
+		creator: input.creator,
+		token: input.token,
+		price: input.price
 	};
 }
 

@@ -304,7 +304,7 @@ export class TonClientAuctionContract implements ITonAuctionContract {
 		const validatedBoc = getValidatedBocResult(result[0]);
 
 		if (!validatedBoc) {
-			console.log("Validation fault for attempt to get BOC for address", this.address);
+			console.log("Validation fault for attempt to get auction BOC for address", this.address);
 			console.log(result[0]);
 
 			return {

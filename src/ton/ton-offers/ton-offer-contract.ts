@@ -10,6 +10,13 @@ export type TonOfferContractGetInfoResult = {
 	readonly endTime: string;
 };
 
+export type TonOfferCreatedEvent = {
+	readonly id: string;
+	readonly creator: string;
+	readonly token: string;
+	readonly price: string;
+};
+
 export interface ITonOfferContract {
 	getInfo(): Promise<RgResult<TonOfferContractGetInfoResult>>;
 	checkMessages(): Promise<void>;

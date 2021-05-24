@@ -216,7 +216,7 @@ export class TonClientTokenContract implements ITonTokenContract {
 		const validatedBoc = getValidatedBocResult(result[0]);
 
 		if (!validatedBoc) {
-			console.log("Validation fault for attempt to get BOC for address", this.address);
+			console.log("Validation fault for attempt to get token BOC for address", this.address);
 			console.log(result[0]);
 
 			return {

@@ -108,33 +108,7 @@ export class TonActionsEvents implements IActionsEvents {
 
 		console.log("Receiving detailed information about the contract", event.addr);
 		const offerContract = this.offerContractFactory.getOfferContract(event.addr);
-		const info = await offerContract.getInfo();
-
-		if (!info.is_success) {
-			console.log("Failed to get detailed information about the offer contract", event.addr, "skipped");
-			return;
-		}
-
-		const token = await this.tokensManager.getTokenByAddress(info.data.token);
-
-		if (!token) {
-			console.log("Token", info.data.token, "for offer", event.addr, "is not found, skipped");
-			return;
-		}
-
-		this.offersManager.addOffer({
-			address: event.addr,
-			offerId: info.data.id,
-			tokenId: token.id,
-			creator: info.data.creator,
-			token: info.data.token,
-			price: info.data.price,
-			fee: info.data.fee,
-			endTime: info.data.endTime,
-			status: "pending"
-		});
-
-		this.offersRootContract.updateLastOfferId();
+		await offerContract.checkMessages();
 	}
 
 	private async onTokenCreated(event: TonContractTokenCreatedEvent): Promise<void> {

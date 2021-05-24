@@ -1,4 +1,4 @@
-import { Abi, ResultOfRunTvm, TonClient } from "@tonclient/core";
+import { Abi, DecodedMessageBody, ResultOfRunTvm, SortDirection, TonClient } from "@tonclient/core";
 import * as fs from "fs";
 import { Event } from "../../utils/events";
 import { RgResult } from "../../utils/result";
@@ -14,6 +14,22 @@ type BocResult = {
 	readonly boc: string;
 };
 
+type EncodedMessage = {
+	readonly body: string;
+	readonly created_at: number;
+	readonly dst_transaction: {
+		readonly aborted: boolean;
+		readonly id: string;
+	} | null;
+};
+
+type DecodedMessage = {
+	readonly name: string;
+	readonly encodedMessage: EncodedMessage;
+	readonly body: Record<string, unknown>;
+	readonly createdAt: number;
+};
+
 type GetTokenAddressResult = {
 	readonly addr: string;
 };
@@ -24,11 +40,18 @@ export class TonClientRootOffersContract implements ITonRootOffersContract {
 	private readonly tonClient: TonClient;
 	private readonly address: string;
 
+	private lastOfferTime: number;
 	private lastOfferId: number;
 
 	constructor(tonClient: TonClient, address: string) {
 		this.tonClient = tonClient;
 		this.address = address;
+
+		try {
+			this.lastOfferTime = +fs.readFileSync("./last_offer_time", "utf-8");
+		} catch (err) {
+			this.lastOfferTime = 0;
+		}
 
 		try {
 			this.lastOfferId = +fs.readFileSync("./last_offer_id", "utf-8");
@@ -37,6 +60,10 @@ export class TonClientRootOffersContract implements ITonRootOffersContract {
 		}
 
 		this.checkMessagesLoop();
+	}
+
+	private saveLastOfferTime(): void {
+		fs.writeFileSync("./last_offer_time", this.lastOfferTime + "");
 	}
 
 	private saveLastOfferd(): void {
@@ -60,10 +87,10 @@ export class TonClientRootOffersContract implements ITonRootOffersContract {
 				continue;
 			}
 
-			const newBoc = await this.getBoc(offerAddressResult.data);
-			if (!newBoc.is_success) {
-				continue;
-			}
+			const messages = await this.getOutgoingMessagesLength(offerAddressResult.data);
+
+			if (!messages.is_success) continue;
+			if (messages.data === 0) continue;
 
 			console.log("Offer address received", offerId, offerAddressResult.data);
 
@@ -71,8 +98,123 @@ export class TonClientRootOffersContract implements ITonRootOffersContract {
 				addr: offerAddressResult.data
 			});
 
+			this.updateLastOfferId();
+
 			const floodLimitsPreventiveDelayMs = 1000;
 			await timeout(floodLimitsPreventiveDelayMs);
+		}
+	}
+
+	private async getMessages(): Promise<RgResult<DecodedMessage[], number>> {
+		let result: unknown[];
+
+		try {
+			const queryCollectionResult = await this.tonClient.net.query_collection({
+				collection: "messages",
+				order: [
+					{
+						path: "created_at",
+						direction: SortDirection.ASC
+					}
+				],
+				filter: {
+					created_at: { gt: this.lastOfferTime },
+					src: { eq: this.address }
+				},
+				result: "body created_at dst_transaction { aborted, id }",
+				limit: 100
+			});
+
+			result = queryCollectionResult.result;
+		} catch (err) {
+			return {
+				is_success: false,
+				error: {
+					code: -1,
+					message: err.message
+				}
+			};
+		}
+
+		const encodedMessages: EncodedMessage[] = [];
+
+		for (const entry of result) {
+			const encodedMessage = getValidatedEncodedMessage(entry);
+
+			if (encodedMessage === null) {
+				continue;
+			}
+
+			encodedMessages.push(encodedMessage);
+		}
+
+		const lastEncodedMessage = encodedMessages[encodedMessages.length - 1];
+		if (lastEncodedMessage !== undefined) {
+			this.lastOfferTime = lastEncodedMessage.created_at;
+			this.saveLastOfferTime();
+		}
+
+		const decodedMessages: DecodedMessage[] = [];
+
+		for (const encodedMessage of encodedMessages) {
+			if (encodedMessage.dst_transaction && encodedMessage.dst_transaction.aborted) {
+				continue;
+			}
+
+			let decoded: DecodedMessageBody;
+
+			try {
+				decoded = await this.tonClient.abi.decode_message_body({
+					abi: OFFERS_ROOT_ABI,
+					body: encodedMessage.body,
+					is_internal: true
+				});
+			} catch (err) {
+				continue;
+			}
+
+			
+			if (!decoded.value) {
+				continue;
+			}
+
+			decodedMessages.push({
+				name: decoded.name,
+				encodedMessage,
+				body: decoded.value,
+				createdAt: encodedMessage.created_at
+			});
+		}
+
+		return {
+			is_success: true,
+			data: decodedMessages
+		};
+	}
+
+	private async getOutgoingMessagesLength(address: string): Promise<RgResult<number, number>> {
+		try {
+			const queryCollectionResult = await this.tonClient.net.query_collection({
+				collection: "messages",
+				filter: {
+					src: { eq: address }
+				},
+				result: "body",
+				limit: 100
+			});
+
+			return {
+				is_success: true,
+				data: queryCollectionResult.result.length
+			};
+		} catch (err) {
+			return {
+				is_success: false,
+				error: {
+					code: -1,
+					message: err.message
+				}
+			};
 		}
 	}
 
@@ -233,6 +375,20 @@ function isStruct(data: unknown): data is Record<string, unknown> {
 	return true;
 }
 
+function getValidatedBocResult(input: unknown): BocResult | null {
+	if (!isStruct(input)) {
+		return null;
+	}
+
+	if (typeof input.boc !== "string") {
+		return null;
+	}
+
+	return {
+		boc: input.boc
+	};
+}
+
 function getValidatedTokenAddressResult(input: unknown): GetTokenAddressResult | null {
 	if (!isStruct(input)) {
 		return null;
@@ -247,16 +403,39 @@ function getValidatedTokenAddressResult(input: unknown): GetTokenAddressResult |
 	};
 }
 
-function getValidatedBocResult(input: unknown): BocResult | null {
+function getValidatedEncodedMessage(input: unknown): EncodedMessage | null {
 	if (!isStruct(input)) {
 		return null;
 	}
 
-	if (typeof input.boc !== "string") {
+	if (typeof input.body !== "string") {
 		return null;
 	}
 
+	if (typeof input.created_at !== "number") {
+		return null;
+	}
+
+	let dstTransaction: EncodedMessage["dst_transaction"] = null;
+
+	if (isStruct(input.dst_transaction)) {
+		if (typeof input.dst_transaction.aborted !== "boolean") {
+			return null;
+		}
+	
+		if (typeof input.dst_transaction.id !== "string") {
+			return null;
+		}
+
+		dstTransaction = {
+			aborted: input.dst_transaction.aborted,
+			id: input.dst_transaction.id
+		};
+	}
+
 	return {
-		boc: input.boc
+		body: input.body,
+		created_at: input.created_at,
+		dst_transaction: dstTransaction
 	};
 }

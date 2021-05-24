@@ -6,7 +6,7 @@ import {
 } from "./ton-token-contract";
 
 import * as fs from "fs";
-import { RgResult } from "../utils/result";
+import { RgResult } from "../../utils/result";
 
 import { Abi, ResultOfRunTvm, TonClient } from "@tonclient/core";
 
@@ -23,6 +23,7 @@ type InfoResult = {
 	readonly id: string;
 	readonly publicKey: string;
 	readonly owner: string;
+	readonly manager: string;
 };
 
 type BocResult = {
@@ -215,7 +216,7 @@ export class TonClientTokenContract implements ITonTokenContract {
 		const validatedBoc = getValidatedBocResult(result[0]);
 
 		if (!validatedBoc) {
-			console.log("Validation fault for attempt to get BOC for address", this.address);
+			console.log("Validation fault for attempt to get token BOC for address", this.address);
 			console.log(result[0]);
 
 			return {
@@ -273,10 +274,15 @@ function getValidatedInfoResult(input: unknown): InfoResult | null {
 		return null;
 	}
 
+	if (typeof input.manager !== "string") {
+		return null;
+	}
+
 	return {
 		id: input.id,
 		owner: input.owner,
-		publicKey: input.publicKey
+		publicKey: input.publicKey,
+		manager: input.manager
 	};
 }
 

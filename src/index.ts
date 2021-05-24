@@ -11,8 +11,8 @@ import { DatabaseToken } from './database/models/token';
 
 import { libNode } from "@tonclient/lib-node";
 import { TonClient } from "@tonclient/core";
-import { TonClientRootContract } from './ton/ton-client-root-contract';
-import { TonClientTokenContractFactory } from './ton/ton-client-token-contract';
+import { TonClientRootContract } from './ton/ton-tokens/ton-client-root-contract';
+import { TonClientTokenContractFactory } from './ton/ton-tokens/ton-client-token-contract';
 import { TonActionsEvents } from './ton/ton-actions-events';
 import { ActionsStorageDatabase } from './actions/actions-storage-database';
 import { DatabaseActionChangeOwner } from './database/models/action-change-owner';
@@ -30,17 +30,31 @@ import { GetAllTokens } from './rpc-methods/get-all-tokens';
 import { getMergedObjects, setProduction } from './utils/utils';
 import { GetActionsByOwner } from './rpc-methods/get-actions-by-owner';
 import { GetTokensByOwner } from './rpc-methods/get-tokens-by-owner';
+import { GetTokenById } from './rpc-methods/get-token-by-id';
+import { AuctionsManager } from './auctions/auctions-manager';
+import { AuctionsStorageDatabase } from './auctions/auctions-storage-database';
+import { DatabaseAuction } from './database/models/auction';
+import { BidsStorageDatabase } from './auctions/bids-storage-database';
+import { DatabaseBid } from './database/models/bid';
+import { TonClientAuctionContractFactory } from './ton/ton-auctions/ton-client-auction-contract';
+import { OffersManager } from './offers/offers-manager';
+import { OffersStorageDatabase } from './offers/offers-storage-database';
+import { DatabaseOffer } from './database/models/offer';
+import { TonClientRootOffersContract } from './ton/ton-offers/ton-client-root-offers-contract';
+import { TonClientOfferContractFactory } from './ton/ton-offers/ton-client-offer-contract';
+import { GetOffers } from './rpc-methods/get-offers';
+import { GetAuctions } from './rpc-methods/get-auctions';
 
 TonClient.useBinaryLibrary(libNode);
 async function main(): Promise<void> {
 	const packageInfo = JSON.parse(fs.readFileSync("./package.json", "utf-8"));
 	console.log("Initialization " + packageInfo.name + " v" + packageInfo.version);
 
-	const RAW_DEFAULT_CONFIG = fs.readFileSync('./config.default.json', 'utf-8');
+	const RAW_DEFAULT_CONFIG = fs.readFileSync('./config/config.json', 'utf-8');
 	let RAW_CONFIG = "{}";
 
 	try {
-		RAW_CONFIG = fs.readFileSync("./config.json", "utf-8");
+		RAW_CONFIG = fs.readFileSync("./config/config.json", "utf-8");
 	} catch (err) {
 		if (err.code !== "ENOENT") {
 			console.error(err);
@@ -60,9 +74,18 @@ async function main(): Promise<void> {
 	console.log("Database initialization...");
 	const db = await createDatabase(config.mysql);
 
+	console.log("Offers manager initialization...");
+	const offersStorage = new OffersStorageDatabase(db.getRepository(DatabaseOffer));
+	const offersManager = new OffersManager(offersStorage);
+
+	console.log("Auctions manager initialization...");
+	const auctionsStorage = new AuctionsStorageDatabase(db.getRepository(DatabaseAuction));
+	const bidsStorage = new BidsStorageDatabase(db.getRepository(DatabaseBid));
+	const auctionsManager = new AuctionsManager(auctionsStorage, bidsStorage);
+
 	console.log("Tokens manager initialization...");
 	const tokensStorage = new TokensStorageDatabase(db.getRepository(DatabaseToken));
-	const tokensManager = new TokensManager(tokensStorage);
+	const tokensManager = new TokensManager(tokensStorage, auctionsManager);
 
 	console.log("Actions manager initialization...");
 	const actionsStorage = new ActionsStorageDatabase({
@@ -76,12 +99,25 @@ async function main(): Promise<void> {
 	const tonClient = new TonClient({ network: { server_address: config.ton.serverAddress } });
 	const tonClientRootContract = new TonClientRootContract(tonClient, config.ton.rootContractAddress);
 	const tonClientTokenContractFactory = new TonClientTokenContractFactory(tonClient);
+	const tonClientAuctionContractFactory = new TonClientAuctionContractFactory(auctionsStorage, tonClient);
+	const tonClientOffersRootContract = new TonClientRootOffersContract(tonClient, config.ton.offersContractAddress);
+	const tonClientOffersContractFactory = new TonClientOfferContractFactory(
+		offersStorage, 
+		tonClient, 
+		offersManager, 
+		tokensManager
+	);
 
 	console.log("TON Event Provider initialization...");
 	const tonActionsEvents = new TonActionsEvents(
 		tokensManager,
+		auctionsManager,
+		offersManager,
 		tonClientRootContract,
-		tonClientTokenContractFactory
+		tonClientTokenContractFactory,
+		tonClientAuctionContractFactory,
+		tonClientOffersRootContract,
+		tonClientOffersContractFactory
 	);
 
 	console.log("Action collector initialization...");
@@ -101,7 +137,10 @@ async function main(): Promise<void> {
 	const getAllActions = new GetAllActions(actionsManager);
 	const getTokensByUser = new GetTokensByUserPublicKey(tokensManager);
 	const getTokensByOwner = new GetTokensByOwner(tokensManager);
+	const getTokenById = new GetTokenById(tokensManager);
 	const getAllTokens = new GetAllTokens(tokensManager);
+	const getOffers = new GetOffers(offersManager);
+	const getAuctions = new GetAuctions(auctionsManager);
 
 	rpcServer.addMethod("get-actions-by-token", getActionsByToken);
 	rpcServer.addMethod("get-actions-by-user", getActionsByUser);
@@ -109,7 +148,10 @@ async function main(): Promise<void> {
 	rpcServer.addMethod("get-all-actions", getAllActions);
 	rpcServer.addMethod("get-tokens-by-user", getTokensByUser);
 	rpcServer.addMethod("get-tokens-by-owner", getTokensByOwner);
+	rpcServer.addMethod("get-token-by-id", getTokenById);
 	rpcServer.addMethod("get-all-tokens", getAllTokens);
+	rpcServer.addMethod("get-offers", getOffers);
+	rpcServer.addMethod("get-auctions", getAuctions);
 
 	console.log("Initialization done!");
 }

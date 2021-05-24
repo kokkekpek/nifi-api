@@ -1,4 +1,4 @@
-import { RgResult } from "../utils/result";
+import { RgResult } from "../../utils/result";
 
 export type TonTokenContractGetArtInfoResult = {
 	readonly hash: string;
@@ -8,6 +8,7 @@ export type TonTokenContractGetInfoResult = {
 	readonly id: string;
 	readonly publicKey: string;
 	readonly owner: string;
+	readonly manager: string;
 };
 
 export interface ITonTokenContract {

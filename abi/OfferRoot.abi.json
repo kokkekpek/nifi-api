@@ -8,6 +8,7 @@
 				{"name":"manager","type":"address"},
 				{"name":"creationMinValue","type":"uint128"},
 				{"name":"creationFee","type":"uint128"},
+				{"name":"creationAndStorageFee","type":"uint128"},
 				{"name":"name","type":"bytes"},
 				{"name":"symbol","type":"bytes"},
 				{"name":"tokenCode","type":"cell"}
@@ -18,12 +19,10 @@
 		{
 			"name": "create",
 			"inputs": [
-				{"name":"owner","type":"address"},
-				{"name":"manager","type":"address"},
-				{"name":"managerUnlockTime","type":"uint32"},
 				{"name":"creator","type":"address"},
-				{"name":"creatorFees","type":"uint32"},
-				{"name":"hash","type":"uint256"}
+				{"name":"token","type":"address"},
+				{"name":"price","type":"uint128"},
+				{"name":"endTime","type":"uint32"}
 			],
 			"outputs": [
 				{"name":"addr","type":"address"}
@@ -62,7 +61,8 @@
 			"name": "setCreationFee",
 			"inputs": [
 				{"name":"minValue","type":"uint128"},
-				{"name":"fee","type":"uint128"}
+				{"name":"fee","type":"uint128"},
+				{"name":"storageFee","type":"uint128"}
 			],
 			"outputs": [
 			]
@@ -74,7 +74,8 @@
 			],
 			"outputs": [
 				{"name":"minValue","type":"uint128"},
-				{"name":"fee","type":"uint128"}
+				{"name":"fee","type":"uint128"},
+				{"name":"storageFee","type":"uint128"}
 			]
 		},
 		{
@@ -83,7 +84,8 @@
 			],
 			"outputs": [
 				{"name":"minValue","type":"uint128"},
-				{"name":"fee","type":"uint128"}
+				{"name":"fee","type":"uint128"},
+				{"name":"storageFee","type":"uint128"}
 			]
 		},
 		{

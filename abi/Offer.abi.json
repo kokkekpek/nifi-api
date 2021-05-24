@@ -1,0 +1,98 @@
+{
+	"ABI version": 2,
+	"header": ["time"],
+	"functions": [
+		{
+			"name": "constructor",
+			"inputs": [
+				{"name":"creator","type":"address"},
+				{"name":"token","type":"address"},
+				{"name":"price","type":"uint128"},
+				{"name":"fee","type":"uint128"},
+				{"name":"endTime","type":"uint32"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "acceptOffer",
+			"inputs": [
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "onReceiveInfo",
+			"inputs": [
+				{"name":"root","type":"address"},
+				{"name":"id","type":"uint128"},
+				{"name":"publicKey","type":"uint256"},
+				{"name":"owner","type":"address"},
+				{"name":"manager","type":"address"},
+				{"name":"managerUnlockTime","type":"uint32"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "finish",
+			"inputs": [
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "getInfo",
+			"inputs": [
+			],
+			"outputs": [
+				{"name":"root","type":"address"},
+				{"name":"id","type":"uint128"},
+				{"name":"creator","type":"address"},
+				{"name":"token","type":"address"},
+				{"name":"price","type":"uint128"},
+				{"name":"fee","type":"uint128"},
+				{"name":"endTime","type":"uint32"}
+			]
+		}
+	],
+	"data": [
+		{"key":1,"name":"_root","type":"address"},
+		{"key":2,"name":"_id","type":"uint128"}
+	],
+	"events": [
+		{
+			"name": "OfferCreated",
+			"inputs": [
+				{"name":"id","type":"uint128"},
+				{"name":"creator","type":"address"},
+				{"name":"token","type":"address"},
+				{"name":"price","type":"uint128"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "OfferAccepted",
+			"inputs": [
+				{"name":"id","type":"uint128"},
+				{"name":"creator","type":"address"},
+				{"name":"token","type":"address"},
+				{"name":"price","type":"uint128"}
+			],
+			"outputs": [
+			]
+		},
+		{
+			"name": "OfferFinished",
+			"inputs": [
+				{"name":"id","type":"uint128"},
+				{"name":"creator","type":"address"},
+				{"name":"token","type":"address"},
+				{"name":"price","type":"uint128"}
+			],
+			"outputs": [
+			]
+		}
+	]
+}

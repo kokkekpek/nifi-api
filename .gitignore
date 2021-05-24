@@ -1,5 +1,6 @@
 node_modules
 package-lock.json
+yarn.lock
 dist
 src/node_modules
 logs
@@ -7,4 +8,9 @@ logs
 ormconfig.json
 last_message_time
 last_token_id
+last_offer_time
+last_offer_id
 config.json
+config/config.json
+config/nginx/nginx.conf
+docker-compose.yml

@@ -1,15 +1,13 @@
 import {
 	Abi,
-	DecodedMessageBody,
 	ResultOfRunTvm,
-	SortDirection,
 	TonClient
 } from "@tonclient/core";
 
 import * as fs from "fs";
-import { Event } from "../utils/events";
-import { RgResult } from "../utils/result";
-import { timeout } from "../utils/timeout";
+import { Event } from "../../utils/events";
+import { RgResult } from "../../utils/result";
+import { timeout } from "../../utils/timeout";
 import { ITonRootContract, TonContractTokenCreatedEvent } from "./ton-root-contract";
 
 const ART_ROOT_ABI: Abi = {
@@ -17,32 +15,8 @@ const ART_ROOT_ABI: Abi = {
 	value: JSON.parse(fs.readFileSync("./abi/ArtRoot.abi.json", "utf-8"))
 };
 
-type EncodedMessage = {
-	readonly body: string;
-	readonly created_at: number;
-	readonly dst_transaction: {
-		readonly aborted: boolean;
-		readonly id: string;
-	};
-};
-
-type DecodedMessage = {
-	readonly encodedMessage: EncodedMessage;
-	readonly body: Record<string, unknown>;
-	readonly createdAt: number;
-};
-
 type BocResult = {
 	readonly boc: string;
-};
-
-type CreateMessage = {
-	readonly owner: string;
-	readonly manager: string;
-	readonly managerUnlockTime: string;
-	readonly creator: string;
-	readonly creatorFees: string;
-	readonly hash: string;
 };
 
 type GetTokenAddressResult = {
@@ -77,10 +51,6 @@ export class TonClientRootContract implements ITonRootContract {
 		this.checkMessagesLoop();
 	}
 
-	private saveLastMessageTime(): void {
-		fs.writeFileSync("./last_message_time", this.lastMessageTime + "");
-	}
-
 	private saveLastTokenId(): void {
 		fs.writeFileSync("./last_token_id", this.lastTokenId + "");
 	}
@@ -92,18 +62,6 @@ export class TonClientRootContract implements ITonRootContract {
 
 	private async checkMessagesLoop(): Promise<void> {
 		while (true) {
-			const messagesResult = await this.getMessages();
-
-			if (!messagesResult.is_success) {
-				console.log("Failed to get root wallet messages:");
-				console.log(messagesResult.error);
-
-				const delayBeforeRetryAfterError = 3000;
-				await timeout(delayBeforeRetryAfterError);
-
-				continue;
-			}
-
 			const tokenId = this.lastTokenId;
 			const tokenAddressResult = await this.getTokenAddress(tokenId + "");
 
@@ -128,92 +86,6 @@ export class TonClientRootContract implements ITonRootContract {
 			const floodLimitsPreventiveDelayMs = 1000;
 			await timeout(floodLimitsPreventiveDelayMs);
 		}
-	}
-
-	private async getMessages(): Promise<RgResult<DecodedMessage[], number>> {
-		let result: unknown[];
-
-		try {
-			const queryCollectionResult = await this.tonClient.net.query_collection({
-				collection: "messages",
-				order: [
-					{
-						path: "created_at",
-						direction: SortDirection.ASC
-					}
-				],
-				filter: {
-					created_at: { gt: this.lastMessageTime },
-					dst: { eq: this.address }
-				},
-				result: "body created_at dst_transaction { aborted, id }",
-				limit: 100
-			});
-
-			result = queryCollectionResult.result;
-		} catch (err) {
-			return {
-				is_success: false,
-				error: {
-					code: -1,
-					message: err.message
-				}
-			};
-		}
-
-		const encodedMessages: EncodedMessage[] = [];
-
-		for (const entry of result) {
-			const encodedMessage = getValidatedEncodedMessage(entry);
-
-			if (encodedMessage === null) {
-				continue;
-			}
-
-			encodedMessages.push(encodedMessage);
-		}
-
-		const lastEncodedMessage = encodedMessages[encodedMessages.length - 1];
-		if (lastEncodedMessage !== undefined) {
-			this.lastMessageTime = lastEncodedMessage.created_at;
-			this.saveLastMessageTime();
-		}
-
-		const decodedMessages: DecodedMessage[] = [];
-
-		for (const encodedMessage of encodedMessages) {
-			if (encodedMessage.dst_transaction.aborted) {
-				continue;
-			}
-
-			let decoded: DecodedMessageBody;
-
-			try {
-				decoded = await this.tonClient.abi.decode_message_body({
-					abi: ART_ROOT_ABI,
-					body: encodedMessage.body,
-					is_internal: true
-				});
-			} catch (err) {
-				continue;
-			}
-
-			
-			if (!decoded.value) {
-				continue;
-			}
-
-			decodedMessages.push({
-				encodedMessage,
-				body: decoded.value,
-				createdAt: encodedMessage.created_at
-			});
-		}
-
-		return {
-			is_success: true,
-			data: decodedMessages
-		};
 	}
 
 	private async getTokenAddress(tokenId: string): Promise<RgResult<string, unknown>> {
@@ -374,80 +246,6 @@ function isStruct(data: unknown): data is Record<string, unknown> {
 	}
   
 	return true;
-}
-
-function getValidatedEncodedMessage(input: unknown): EncodedMessage | null {
-	if (!isStruct(input)) {
-		return null;
-	}
-
-	if (typeof input.body !== "string") {
-		return null;
-	}
-
-	if (typeof input.created_at !== "number") {
-		return null;
-	}
-
-	if (!isStruct(input.dst_transaction)) {
-		return null;
-	}
-
-	if (typeof input.dst_transaction.aborted !== "boolean") {
-		return null;
-	}
-
-	if (typeof input.dst_transaction.id !== "string") {
-		return null;
-	}
-
-	return {
-		body: input.body,
-		created_at: input.created_at,
-		dst_transaction: {
-			aborted: input.dst_transaction.aborted,
-			id: input.dst_transaction.id
-		}
-	};
-}
-
-function getValidatedCreateMessage(input: unknown): CreateMessage | null {
-	if (!isStruct(input)) {
-		return null;
-	}
-
-	if (typeof input.owner !== "string") {
-		return null;
-	}
-
-	if (typeof input.manager !== "string") {
-		return null;
-	}
-
-	if (typeof input.managerUnlockTime !== "string") {
-		return null;
-	}
-
-	if (typeof input.creator !== "string") {
-		return null;
-	}
-
-	if (typeof input.creatorFees !== "string") {
-		return null;
-	}
-
-	if (typeof input.hash !== "string") {
-		return null;
-	}
-
-	return {
-		owner: input.owner,
-		manager: input.manager,
-		managerUnlockTime: input.managerUnlockTime,
-		creator: input.creator,
-		creatorFees: input.creatorFees,
-		hash: input.hash
-	};
 }
 
 function getValidatedTokenAddressResult(input: unknown): GetTokenAddressResult | null {

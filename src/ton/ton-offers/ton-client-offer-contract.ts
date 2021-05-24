@@ -2,7 +2,7 @@ import * as fs from "fs";
 import { Abi, DecodedMessageBody, ResultOfRunTvm, SortDirection, TonClient } from "@tonclient/core";
 import { Event } from "../../utils/events";
 import { ITonMessagesCheckerStorage } from "../ton-messages-checker-storage";
-import { ITonOfferContract, TonOfferContractGetInfoResult } from "./ton-offer-contract";
+import { ITonOfferContract, ITonOfferContractFactory, TonOfferContractGetInfoResult } from "./ton-offer-contract";
 import { RgResult } from "../../utils/result";
 import { timeout } from "../../utils/timeout";
 
@@ -39,6 +39,20 @@ type InfoResult = {
 	readonly fee: string;
 	readonly endTime: string;
 };
+
+export class TonClientOfferContractFactory implements ITonOfferContractFactory {
+	private readonly storage: ITonMessagesCheckerStorage;
+	private readonly tonClient: TonClient;
+
+	constructor(storage: ITonMessagesCheckerStorage, tonClient: TonClient) {
+		this.storage = storage;
+		this.tonClient = tonClient;
+	}
+
+	public getOfferContract(addr: string): ITonOfferContract {
+		return new TonClientOfferContract(this.storage, this.tonClient, addr);
+	}
+}
 
 export class TonClientOfferContract implements ITonOfferContract {
 	private readonly storage: ITonMessagesCheckerStorage;

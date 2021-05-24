@@ -36,15 +36,6 @@ type BocResult = {
 	readonly boc: string;
 };
 
-type CreateMessage = {
-	readonly owner: string;
-	readonly manager: string;
-	readonly managerUnlockTime: string;
-	readonly creator: string;
-	readonly creatorFees: string;
-	readonly hash: string;
-};
-
 type GetTokenAddressResult = {
 	readonly addr: string;
 };
@@ -408,45 +399,6 @@ function getValidatedEncodedMessage(input: unknown): EncodedMessage | null {
 			aborted: input.dst_transaction.aborted,
 			id: input.dst_transaction.id
 		}
-	};
-}
-
-function getValidatedCreateMessage(input: unknown): CreateMessage | null {
-	if (!isStruct(input)) {
-		return null;
-	}
-
-	if (typeof input.owner !== "string") {
-		return null;
-	}
-
-	if (typeof input.manager !== "string") {
-		return null;
-	}
-
-	if (typeof input.managerUnlockTime !== "string") {
-		return null;
-	}
-
-	if (typeof input.creator !== "string") {
-		return null;
-	}
-
-	if (typeof input.creatorFees !== "string") {
-		return null;
-	}
-
-	if (typeof input.hash !== "string") {
-		return null;
-	}
-
-	return {
-		owner: input.owner,
-		manager: input.manager,
-		managerUnlockTime: input.managerUnlockTime,
-		creator: input.creator,
-		creatorFees: input.creatorFees,
-		hash: input.hash
 	};
 }
 

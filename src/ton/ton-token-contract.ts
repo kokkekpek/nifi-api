@@ -8,6 +8,7 @@ export type TonTokenContractGetInfoResult = {
 	readonly id: string;
 	readonly publicKey: string;
 	readonly owner: string;
+	readonly manager: string;
 };
 
 export interface ITonTokenContract {

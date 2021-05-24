@@ -20,7 +20,8 @@ export class TokensCollector {
 				address: event.address,
 				userPublicKey: event.userPublicKey,
 				owner: event.owner,
-				hash: event.hash
+				hash: event.hash,
+				auction: null
 			});
 		}
 	}

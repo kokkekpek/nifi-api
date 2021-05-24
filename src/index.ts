@@ -31,6 +31,12 @@ import { getMergedObjects, setProduction } from './utils/utils';
 import { GetActionsByOwner } from './rpc-methods/get-actions-by-owner';
 import { GetTokensByOwner } from './rpc-methods/get-tokens-by-owner';
 import { GetTokenById } from './rpc-methods/get-token-by-id';
+import { AuctionsManager } from './auctions/auctions-manager';
+import { AuctionsStorageDatabase } from './auctions/auctions-storage-database';
+import { DatabaseAuction } from './database/models/auction';
+import { BidsStorageDatabase } from './auctions/bids-storage-database';
+import { DatabaseBid } from './database/models/bid';
+import { TonClientAuctionContractFactory } from './ton/ton-client-auction-contract';
 
 TonClient.useBinaryLibrary(libNode);
 async function main(): Promise<void> {
@@ -61,9 +67,14 @@ async function main(): Promise<void> {
 	console.log("Database initialization...");
 	const db = await createDatabase(config.mysql);
 
+	console.log("Auctions manager initialization...");
+	const auctionsStorage = new AuctionsStorageDatabase(db.getRepository(DatabaseAuction));
+	const bidsStorage = new BidsStorageDatabase(db.getRepository(DatabaseBid));
+	const auctionsManager = new AuctionsManager(auctionsStorage, bidsStorage);
+
 	console.log("Tokens manager initialization...");
 	const tokensStorage = new TokensStorageDatabase(db.getRepository(DatabaseToken));
-	const tokensManager = new TokensManager(tokensStorage);
+	const tokensManager = new TokensManager(tokensStorage, auctionsManager);
 
 	console.log("Actions manager initialization...");
 	const actionsStorage = new ActionsStorageDatabase({
@@ -77,12 +88,15 @@ async function main(): Promise<void> {
 	const tonClient = new TonClient({ network: { server_address: config.ton.serverAddress } });
 	const tonClientRootContract = new TonClientRootContract(tonClient, config.ton.rootContractAddress);
 	const tonClientTokenContractFactory = new TonClientTokenContractFactory(tonClient);
+	const tonClientAuctionContractFactory = new TonClientAuctionContractFactory(auctionsStorage, tonClient);
 
 	console.log("TON Event Provider initialization...");
 	const tonActionsEvents = new TonActionsEvents(
 		tokensManager,
+		auctionsManager,
 		tonClientRootContract,
-		tonClientTokenContractFactory
+		tonClientTokenContractFactory,
+		tonClientAuctionContractFactory
 	);
 
 	console.log("Action collector initialization...");

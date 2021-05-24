@@ -6,9 +6,9 @@ import { Token, TokensManager } from "../tokens/tokens-manager";
 import { Event } from "../utils/events";
 import { RgResult } from "../utils/result";
 import { timeout } from "../utils/timeout";
-import { ITonAuctionContractFactory } from "./ton-auction-contract";
-import { ITonRootContract, TonContractTokenCreatedEvent } from "./ton-root-contract";
-import { ITonTokenContract, ITonTokenContractFactory } from "./ton-token-contract";
+import { ITonAuctionContractFactory } from "./ton-auctions/ton-auction-contract";
+import { ITonRootContract, TonContractTokenCreatedEvent } from "./ton-tokens/ton-root-contract";
+import { ITonTokenContract, ITonTokenContractFactory } from "./ton-tokens/ton-token-contract";
 
 type GetFullTokenInfoResult = {
 	readonly id: string;

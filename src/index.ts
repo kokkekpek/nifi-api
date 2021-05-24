@@ -11,8 +11,8 @@ import { DatabaseToken } from './database/models/token';
 
 import { libNode } from "@tonclient/lib-node";
 import { TonClient } from "@tonclient/core";
-import { TonClientRootContract } from './ton/ton-client-root-contract';
-import { TonClientTokenContractFactory } from './ton/ton-client-token-contract';
+import { TonClientRootContract } from './ton/ton-tokens/ton-client-root-contract';
+import { TonClientTokenContractFactory } from './ton/ton-tokens/ton-client-token-contract';
 import { TonActionsEvents } from './ton/ton-actions-events';
 import { ActionsStorageDatabase } from './actions/actions-storage-database';
 import { DatabaseActionChangeOwner } from './database/models/action-change-owner';
@@ -36,7 +36,7 @@ import { AuctionsStorageDatabase } from './auctions/auctions-storage-database';
 import { DatabaseAuction } from './database/models/auction';
 import { BidsStorageDatabase } from './auctions/bids-storage-database';
 import { DatabaseBid } from './database/models/bid';
-import { TonClientAuctionContractFactory } from './ton/ton-client-auction-contract';
+import { TonClientAuctionContractFactory } from './ton/ton-auctions/ton-client-auction-contract';
 
 TonClient.useBinaryLibrary(libNode);
 async function main(): Promise<void> {

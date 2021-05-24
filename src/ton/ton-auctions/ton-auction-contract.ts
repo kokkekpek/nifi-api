@@ -1,6 +1,6 @@
-import { AuctionBid } from "../auctions/auctions-manager";
-import { Event } from "../utils/events";
-import { RgResult } from "../utils/result";
+import { AuctionBid } from "../../auctions/auctions-manager";
+import { Event } from "../../utils/events";
+import { RgResult } from "../../utils/result";
 
 export type TonAuctionContractGetInfoResult = {
 	readonly id: string;

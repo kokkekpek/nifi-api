@@ -6,11 +6,11 @@ import {
 
 import * as fs from "fs";
 import { Abi, DecodedMessageBody, ResultOfRunTvm, SortDirection, TonClient } from "@tonclient/core";
-import { AuctionBid } from "../auctions/auctions-manager";
-import { Event } from "../utils/events";
-import { RgResult } from "../utils/result";
-import { ITonMessagesCheckerStorage } from "./ton-messages-checker-storage";
-import { timeout } from "../utils/timeout";
+import { AuctionBid } from "../../auctions/auctions-manager";
+import { Event } from "../../utils/events";
+import { RgResult } from "../../utils/result";
+import { ITonMessagesCheckerStorage } from "./../ton-messages-checker-storage";
+import { timeout } from "../../utils/timeout";
 
 const DIRECT_AUCTION_ABI: Abi = {
 	type: "Contract",

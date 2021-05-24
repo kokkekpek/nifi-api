@@ -8,5 +8,6 @@ export type Config = {
 	readonly ton: {
 		readonly serverAddress: string;
 		readonly rootContractAddress: string;
+		readonly offersContractAddress: string;
 	};
 };

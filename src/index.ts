@@ -37,6 +37,11 @@ import { DatabaseAuction } from './database/models/auction';
 import { BidsStorageDatabase } from './auctions/bids-storage-database';
 import { DatabaseBid } from './database/models/bid';
 import { TonClientAuctionContractFactory } from './ton/ton-auctions/ton-client-auction-contract';
+import { OffersManager } from './offers/offers-manager';
+import { OffersStorageDatabase } from './offers/offers-storage-database';
+import { DatabaseOffer } from './database/models/offer';
+import { TonClientRootOffersContract } from './ton/ton-offers/ton-client-root-offers-contract';
+import { TonClientOfferContractFactory } from './ton/ton-offers/ton-client-offer-contract';
 
 TonClient.useBinaryLibrary(libNode);
 async function main(): Promise<void> {
@@ -67,6 +72,10 @@ async function main(): Promise<void> {
 	console.log("Database initialization...");
 	const db = await createDatabase(config.mysql);
 
+	console.log("Offers manager initialization...");
+	const offersStorage = new OffersStorageDatabase(db.getRepository(DatabaseOffer));
+	const offersManager = new OffersManager(offersStorage);
+
 	console.log("Auctions manager initialization...");
 	const auctionsStorage = new AuctionsStorageDatabase(db.getRepository(DatabaseAuction));
 	const bidsStorage = new BidsStorageDatabase(db.getRepository(DatabaseBid));
@@ -89,14 +98,19 @@ async function main(): Promise<void> {
 	const tonClientRootContract = new TonClientRootContract(tonClient, config.ton.rootContractAddress);
 	const tonClientTokenContractFactory = new TonClientTokenContractFactory(tonClient);
 	const tonClientAuctionContractFactory = new TonClientAuctionContractFactory(auctionsStorage, tonClient);
+	const tonClientOffersRootContract = new TonClientRootOffersContract(tonClient, config.ton.offersContractAddress);
+	const tonClientOffersContractFactory = new TonClientOfferContractFactory(offersStorage, tonClient);
 
 	console.log("TON Event Provider initialization...");
 	const tonActionsEvents = new TonActionsEvents(
 		tokensManager,
 		auctionsManager,
+		offersManager,
 		tonClientRootContract,
 		tonClientTokenContractFactory,
-		tonClientAuctionContractFactory
+		tonClientAuctionContractFactory,
+		tonClientOffersRootContract,
+		tonClientOffersContractFactory
 	);
 
 	console.log("Action collector initialization...");

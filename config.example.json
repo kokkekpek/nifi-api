@@ -27,6 +27,7 @@
     "api.openPorts": true,
     "api.port": 3380,
     "api.net": "https://net.ton.dev",
-    "api.contract": "0:cf232e916acd2f411d597ffdc1d88d42922439f7ec5e28583f0e35293eabea8b"
+    "api.rootContractAddress": "0:cf232e916acd2f411d597ffdc1d88d42922439f7ec5e28583f0e35293eabea8b",
+    "api.offersContractAddress": "0:XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
   }
 }

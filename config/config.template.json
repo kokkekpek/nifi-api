@@ -12,6 +12,7 @@
 	},
 	"ton": {
 		"serverAddress": "{cfg.api.net}",
-		"rootContractAddress": "{cfg.api.contract}"
+		"rootContractAddress": "{cfg.api.rootContractAddress}",
+		"offersContractAddress": "{cfg.api.offersContractAddress}"
 	}
 }

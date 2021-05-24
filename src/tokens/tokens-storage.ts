@@ -12,6 +12,7 @@ export interface ITokensStorage {
 	addToken(record: TokenStorageEntry): Promise<void>;
 	getAllTokens(): Promise<TokenStorageEntry[]>;
 	getTokenById(tokenId: string): Promise<TokenStorageEntry | undefined>;
+	getTokenByAddress(tokenAddress: string): Promise<TokenStorageEntry | undefined>;
 	getTokensByUserPublicKey(userPublicKey: string): Promise<TokenStorageEntry[]>;
 	getTokensByOwner(owner: string): Promise<TokenStorageEntry[]>;
 	setOwnerByTokenId(tokenId: string, newOwner: string): Promise<void>;

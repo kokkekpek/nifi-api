@@ -51,6 +51,14 @@ export class TokensStorageDatabase implements ITokensStorage {
 		return this.getTokenByDatabaseToken(databaseToken);
 	}
 
+	public async getTokenByAddress(tokenAddress: string): Promise<TokenStorageEntry | undefined> {
+		const databaseToken = await this.repository.findOne({ address: tokenAddress });
+
+		if (!databaseToken) return;
+
+		return this.getTokenByDatabaseToken(databaseToken);
+	}
+
 	public async getAllTokens(): Promise<TokenStorageEntry[]> {
 		const databaseTokens = await this.repository.find();
 		return databaseTokens.map(this.getTokenByDatabaseToken);

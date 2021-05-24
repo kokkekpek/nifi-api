@@ -72,6 +72,14 @@ export class TokensManager {
 		return result;
 	}
 
+	public async getTokenByAddress(address: string): Promise<Token | undefined> {
+		const result = await this.storage.getTokenByAddress(address);
+
+		if (!result) return;
+
+		return this.getTokenByTokenStorageEntry(result);
+	}
+
 	public async setAuctionByTokenId(tokenId: string, auction: AuctionStorageEntry): Promise<void> {
 		await this.storage.setAuctionIdByTokenId(tokenId, auction.auctionId);
 		await this.auctionsManager.addAuction(auction);

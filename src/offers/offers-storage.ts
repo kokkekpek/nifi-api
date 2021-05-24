@@ -2,6 +2,7 @@ import { OfferStatus } from "./offers-manager";
 
 export type OfferStorageEntry = {
 	readonly offerId: string;
+	readonly tokenId: string;
 	readonly address: string;
 	readonly creator: string;
 	readonly token: string;

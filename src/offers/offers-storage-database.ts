@@ -28,6 +28,7 @@ export class OffersStorageDatabase implements IOffersStorage, ITonMessagesChecke
 	public async addOffer(offer: OfferStorageEntry): Promise<void> {
 		const databaseOffer = new DatabaseOffer(
 			offer.offerId,
+			offer.tokenId,
 			offer.address,
 			offer.creator,
 			offer.token,
@@ -44,6 +45,7 @@ export class OffersStorageDatabase implements IOffersStorage, ITonMessagesChecke
 	private getOfferStorageEntryByDatabaseOffer(databaseOffer: DatabaseOffer): OfferStorageEntry {
 		return {
 			offerId: databaseOffer.offer_id,
+			tokenId: databaseOffer.token_id,
 			address: databaseOffer.address,
 			creator: databaseOffer.creator,
 			token: databaseOffer.token,
@@ -68,9 +70,9 @@ export class OffersStorageDatabase implements IOffersStorage, ITonMessagesChecke
 		let result: DatabaseOffer[] = [];
 
 		if (status === null) {
-			result = await this.repository.find({ token: tokenId });
+			result = await this.repository.find({ token_id: tokenId });
 		} else {
-			result = await this.repository.find({ token: tokenId, status });
+			result = await this.repository.find({ token_id: tokenId, status });
 		}
 
 		return result.map(this.getOfferStorageEntryByDatabaseOffer.bind(this));

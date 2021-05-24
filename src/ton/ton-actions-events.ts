@@ -115,9 +115,17 @@ export class TonActionsEvents implements IActionsEvents {
 			return;
 		}
 
+		const token = await this.tokensManager.getTokenByAddress(info.data.token);
+
+		if (!token) {
+			console.log("Token", info.data.token, "for offer", event.addr, "is not found, skipped");
+			return;
+		}
+
 		this.offersManager.addOffer({
 			address: event.addr,
 			offerId: info.data.id,
+			tokenId: token.id,
 			creator: info.data.creator,
 			token: info.data.token,
 			price: info.data.price,
@@ -235,7 +243,12 @@ export class TonActionsEvents implements IActionsEvents {
 
 						this.tokensManager.setAuctionByTokenId(token.id, auction);
 					} else {
-						if (!auctionDetailsResult.error.message?.includes("Replay protection exception")) {
+						if (
+							!auctionDetailsResult.error.message?.includes("Replay protection exception") &&
+							!auctionDetailsResult.error.message?.includes("empty response on BOC request") &&
+							!auctionDetailsResult.error.message?.includes("exit code: 60") &&
+							!auctionDetailsResult.error.message?.includes("BOC Validation fault")
+						) {
 							console.log(
 								"Failed to get detailed information about auction:",
 								fullTokenInfoResult.data.manager,

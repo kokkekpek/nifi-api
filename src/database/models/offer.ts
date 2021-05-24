@@ -19,6 +19,10 @@ export class DatabaseOffer {
 
 	@Column({ length: 255, type: "varchar" })
 	@Index()
+	token_id: string;
+
+	@Column({ length: 255, type: "varchar" })
+	@Index()
 	address: string;
 
 	@Column({ length: 255, type: "varchar" })
@@ -45,6 +49,7 @@ export class DatabaseOffer {
 
 	constructor(
 		offerId: string,
+		tokenId: string,
 		address: string,
 		creator: string,
 		token: string,
@@ -55,6 +60,7 @@ export class DatabaseOffer {
 		lastMessageTime: number
 	) {
 		this.offer_id = offerId;
+		this.token_id = tokenId;
 		this.address = address;
 		this.creator = creator;
 		this.token = token;

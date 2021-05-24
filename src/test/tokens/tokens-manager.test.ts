@@ -9,6 +9,10 @@ import { AuctionsManager } from "../../auctions/auctions-manager";
 let tokensManager: TokensManager;
 
 class MockAuctionsStorage implements IAuctionsStorage {
+	public async getAuctionsByTokenId(): Promise<AuctionStorageEntry[]> {
+		return [];
+	}
+
 	public async getAuctionByAuctionId(): Promise<AuctionStorageEntry | undefined> {
 		return;
 	}

@@ -39,6 +39,11 @@ export class AuctionsStorageDatabase implements IAuctionsStorage, ITonMessagesCh
 		};
 	}
 
+	public async getAuctionsByTokenId(tokenId: string): Promise<AuctionStorageEntry[]> {
+		const result = await this.repository.find({ token: tokenId });
+		return result.map(this.getActionStorageEntryByDatabaseEntry);
+	}
+
 	public async getAuctionByAuctionId(auctionId: string): Promise<AuctionStorageEntry | undefined> {
 		const databaseAuction = await this.repository.findOne({ auction_id: auctionId });
 

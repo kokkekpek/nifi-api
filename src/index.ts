@@ -43,6 +43,7 @@ import { DatabaseOffer } from './database/models/offer';
 import { TonClientRootOffersContract } from './ton/ton-offers/ton-client-root-offers-contract';
 import { TonClientOfferContractFactory } from './ton/ton-offers/ton-client-offer-contract';
 import { GetOffers } from './rpc-methods/get-offers';
+import { GetAuctions } from './rpc-methods/get-auctions';
 
 TonClient.useBinaryLibrary(libNode);
 async function main(): Promise<void> {
@@ -134,6 +135,7 @@ async function main(): Promise<void> {
 	const getTokenById = new GetTokenById(tokensManager);
 	const getAllTokens = new GetAllTokens(tokensManager);
 	const getOffers = new GetOffers(offersManager);
+	const getAuctions = new GetAuctions(auctionsManager);
 
 	rpcServer.addMethod("get-actions-by-token", getActionsByToken);
 	rpcServer.addMethod("get-actions-by-user", getActionsByUser);
@@ -144,6 +146,7 @@ async function main(): Promise<void> {
 	rpcServer.addMethod("get-token-by-id", getTokenById);
 	rpcServer.addMethod("get-all-tokens", getAllTokens);
 	rpcServer.addMethod("get-offers", getOffers);
+	rpcServer.addMethod("get-auctions", getAuctions);
 
 	console.log("Initialization done!");
 }

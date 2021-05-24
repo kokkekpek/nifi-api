@@ -12,6 +12,7 @@ export type AuctionStorageEntry = {
 };
 
 export interface IAuctionsStorage {
+	getAuctionsByTokenId(tokenId: string): Promise<AuctionStorageEntry[]>;
 	getAuctionByAuctionId(auctionId: string): Promise<AuctionStorageEntry | undefined>;
 	hasAuctionWithAuctionId(auctionId: string): Promise<boolean>;
 	addAuction(auction: AuctionStorageEntry): Promise<void>;

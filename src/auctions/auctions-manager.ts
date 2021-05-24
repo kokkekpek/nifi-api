@@ -20,7 +20,7 @@ export type Auction = {
 	readonly feeBid: string;
 	readonly startTime: number;
 	readonly endTime: number;
-	readonly bids: AuctionBid[];
+	bids: AuctionBid[];
 	finishBid: AuctionBid | null;
 };
 
@@ -77,13 +77,7 @@ export class AuctionsManager {
 		}
 	}
 
-	public async getAuctionByAuctionId(auctionId: string): Promise<Auction | undefined> {
-		const storageEntry = await this.storage.getAuctionByAuctionId(auctionId);
-
-		if (!storageEntry) return;
-
-		const bids = await this.bidsStorage.getBidsByAuctionId(auctionId);
-
+	private getAuctionByAuctionStorageEntry(storageEntry: AuctionStorageEntry): Auction {
 		const auction: Auction = {
 			auctionId: storageEntry.auctionId,
 			address: storageEntry.address,
@@ -95,8 +89,19 @@ export class AuctionsManager {
 			startTime: storageEntry.startTime,
 			endTime: storageEntry.endTime,
 			finishBid: null,
-			bids
+			bids: []
 		};
+
+		return auction;
+	}
+
+	public async getAuctionByAuctionId(auctionId: string): Promise<Auction | undefined> {
+		const storageEntry = await this.storage.getAuctionByAuctionId(auctionId);
+
+		if (!storageEntry) return;
+
+		const bids = await this.bidsStorage.getBidsByAuctionId(auctionId);
+		const auction = await this.getAuctionByAuctionStorageEntry(storageEntry);
 
 		if (storageEntry.finishBid !== undefined) {
 			let finishBid = bids.find(entry => {
@@ -110,6 +115,23 @@ export class AuctionsManager {
 			auction.finishBid = finishBid || null;
 		}
 
+		auction.bids = bids;
+
 		return auction;
+	}
+
+	public async getAuctionsByTokenId(tokenId: string): Promise<Auction[]> {
+		const auctions = await this.storage.getAuctionsByTokenId(tokenId);
+		const result: Auction[] = [];
+
+		for (const storageEntry of auctions) {
+			const auction = this.getAuctionByAuctionStorageEntry(storageEntry);
+			const bids = await this.bidsStorage.getBidsByAuctionId(auction.auctionId);
+
+			auction.bids = bids;
+			result.push(auction);
+		}
+
+		return result;
 	}
 }

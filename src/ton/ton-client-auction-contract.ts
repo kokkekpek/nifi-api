@@ -27,7 +27,7 @@ type EncodedMessage = {
 	readonly dst_transaction: {
 		readonly aborted: boolean;
 		readonly id: string;
-	};
+	} | null;
 };
 
 type DecodedMessage = {
@@ -195,7 +195,7 @@ export class TonClientAuctionContract implements ITonAuctionContract {
 		const decodedMessages: DecodedMessage[] = [];
 
 		for (const encodedMessage of encodedMessages) {
-			if (encodedMessage.dst_transaction.aborted) {
+			if (encodedMessage.dst_transaction && encodedMessage.dst_transaction.aborted) {
 				continue;
 			}
 
@@ -475,25 +475,27 @@ function getValidatedEncodedMessage(input: unknown): EncodedMessage | null {
 		return null;
 	}
 
-	if (!isStruct(input.dst_transaction)) {
-		return null;
-	}
+	let dstTransaction: EncodedMessage["dst_transaction"] = null;
 
-	if (typeof input.dst_transaction.aborted !== "boolean") {
-		return null;
-	}
+	if (isStruct(input.dst_transaction)) {
+		if (typeof input.dst_transaction.aborted !== "boolean") {
+			return null;
+		}
+	
+		if (typeof input.dst_transaction.id !== "string") {
+			return null;
+		}
 
-	if (typeof input.dst_transaction.id !== "string") {
-		return null;
+		dstTransaction = {
+			aborted: input.dst_transaction.aborted,
+			id: input.dst_transaction.id
+		};
 	}
 
 	return {
 		body: input.body,
 		created_at: input.created_at,
-		dst_transaction: {
-			aborted: input.dst_transaction.aborted,
-			id: input.dst_transaction.id
-		}
+		dst_transaction: dstTransaction
 	};
 }
 

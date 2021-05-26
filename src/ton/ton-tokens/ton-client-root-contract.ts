@@ -83,6 +83,8 @@ export class TonClientRootContract implements ITonRootContract {
 				addr: tokenAddressResult.data
 			});
 
+			this.updateLastTokenId();
+
 			const floodLimitsPreventiveDelayMs = 1000;
 			await timeout(floodLimitsPreventiveDelayMs);
 		}

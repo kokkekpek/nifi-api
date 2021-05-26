@@ -134,8 +134,6 @@ export class TonActionsEvents implements IActionsEvents {
 			owner: info.owner,
 			hash: info.hash
 		});
-
-		this.rootContract.updateLastTokenId();
 	}
 
 	private async tokenContractsLoop(): Promise<void> {

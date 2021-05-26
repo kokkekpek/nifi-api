@@ -230,6 +230,19 @@ export class TonClientAuctionContract implements ITonAuctionContract {
 		};
 	}
 
+	public async finish(): Promise<RgResult<void, number>> {
+		const result = await this.invoke("finish");
+
+		if (!result.is_success) {
+			return result;
+		}
+
+		return {
+			is_success: true,
+			data: undefined
+		};
+	}
+
 	public async getInfo(): Promise<RgResult<TonAuctionContractGetInfoResult, number>> {
 		const result = await this.invoke("getInfo");
 

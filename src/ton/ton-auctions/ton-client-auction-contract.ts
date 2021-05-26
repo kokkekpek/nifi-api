@@ -4,8 +4,15 @@ import {
 	TonAuctionContractGetInfoResult
 } from "./ton-auction-contract";
 
+import {
+	Abi,
+	DecodedMessageBody,
+	ResultOfRunTvm,
+	SortDirection,
+	TonClient
+} from "@tonclient/core";
+
 import * as fs from "fs";
-import { Abi, DecodedMessageBody, ResultOfRunTvm, SortDirection, TonClient } from "@tonclient/core";
 import { AuctionBid } from "../../auctions/auctions-manager";
 import { Event } from "../../utils/events";
 import { RgResult } from "../../utils/result";
@@ -231,7 +238,7 @@ export class TonClientAuctionContract implements ITonAuctionContract {
 	}
 
 	public async finish(): Promise<RgResult<void, number>> {
-		const result = await this.invoke("finish");
+		const result = await this.execute("finish");
 
 		if (!result.is_success) {
 			return result;
@@ -332,6 +339,37 @@ export class TonClientAuctionContract implements ITonAuctionContract {
 		return {
 			is_success: true,
 			data: validatedBoc.boc
+		};
+	}
+
+	private async execute(functionName: string): Promise<RgResult<void, number>> {
+		try {
+			await this.tonClient.processing.process_message({
+				message_encode_params: {
+					abi: DIRECT_AUCTION_ABI,
+					address: this.address,
+					call_set: {
+						function_name: functionName
+					},
+					signer: {
+						type: "None"
+					}
+				},
+				send_events: true
+			});
+		} catch (err) {
+			return {
+				is_success: false,
+				error: {
+					code: -1,
+					message: err.message
+				}
+			};
+		}
+
+		return {
+			is_success: true,
+			data: undefined
 		};
 	}
 

@@ -8,7 +8,6 @@
 				{"name":"creator","type":"address"},
 				{"name":"token","type":"address"},
 				{"name":"price","type":"uint128"},
-				{"name":"fee","type":"uint128"},
 				{"name":"endTime","type":"uint32"}
 			],
 			"outputs": [
@@ -51,7 +50,6 @@
 				{"name":"creator","type":"address"},
 				{"name":"token","type":"address"},
 				{"name":"price","type":"uint128"},
-				{"name":"fee","type":"uint128"},
 				{"name":"endTime","type":"uint32"}
 			]
 		}

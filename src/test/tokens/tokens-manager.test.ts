@@ -5,8 +5,28 @@ import { DatabaseToken } from "../../database/models/token";
 import { AuctionStorageEntry, IAuctionsStorage } from "../../auctions/auctions-storage";
 import { BidStorageEntry, IBidsStorage } from "../../auctions/bids-storage";
 import { AuctionsManager } from "../../auctions/auctions-manager";
+import { IOffersStorage, OfferStorageEntry } from "../../offers/offers-storage";
+import { OffersManager } from "../../offers/offers-manager";
 
 let tokensManager: TokensManager;
+
+class MockOffersStorage implements IOffersStorage {
+	public async addOffer(): Promise<void> {
+		// PASS
+	}
+
+	public async hasOfferWithOfferId(): Promise<boolean> {
+		return false;
+	}
+
+	public async getOffersByTokenId(): Promise<OfferStorageEntry[]> {
+		return [];
+	}
+
+	public async setOfferStatus(): Promise<void> {
+		// PASS
+	}
+}
 
 class MockAuctionsStorage implements IAuctionsStorage {
 	public async getAuctionsByTokenId(): Promise<AuctionStorageEntry[]> {
@@ -63,8 +83,12 @@ beforeEach(async () => {
 		new MockBidsStorage()
 	);
 
+	const offersManager = new OffersManager(
+		new MockOffersStorage()
+	);
+
 	const storage = new TokensStorageDatabase(connection.getRepository(DatabaseToken));
-	tokensManager = new TokensManager(storage, auctionsManager);
+	tokensManager = new TokensManager(storage, auctionsManager, offersManager);
 });
 
 afterEach(() => {
@@ -81,7 +105,8 @@ test("Get and add tokens", async () => {
 		userPublicKey: "TestTokenUserPublicKey1",
 		owner: "TestTokenOwner1",
 		hash: "TestTokenHash1",
-		auction: null
+		auction: null,
+		offers: []
 	};
 
 	expect(await tokensManager.addToken(testToken1)).toBe("success");
@@ -107,7 +132,8 @@ test("Get and add tokens", async () => {
 		userPublicKey: "TestTokenUserPublicKey2",
 		owner: "TestTokenOwner2",
 		hash: "TestTokenHash2",
-		auction: null
+		auction: null,
+		offers: []
 	};
 
 	expect(await tokensManager.addToken(testToken2)).toBe("success");
@@ -145,7 +171,8 @@ test("Add two tokens with the same id", async () => {
 		userPublicKey: "TestTokenUserPublicKey1",
 		owner: "TestTokenOwner1",
 		hash: "TestTokenHash1",
-		auction: null
+		auction: null,
+		offers: []
 	};
 
 	expect(await tokensManager.addToken(testToken1)).toBe("success");
@@ -159,7 +186,8 @@ test("Add tokens race condition avoid", async () => {
 		userPublicKey: "TestTokenUserPublicKey1",
 		owner: "TestTokenOwner1",
 		hash: "TestTokenHash1",
-		auction: null
+		auction: null,
+		offers: []
 	};
 
 	expect((await Promise.all([
@@ -175,7 +203,8 @@ test("Update token", async () => {
 		userPublicKey: "TestTokenUserPublicKey1",
 		owner: "TestTokenOwner1",
 		hash: "TestTokenHash1",
-		auction: null
+		auction: null,
+		offers: []
 	};
 
 	await tokensManager.addToken(testToken1);
@@ -210,7 +239,8 @@ test("Tokens update independently", async () => {
 		userPublicKey: "TestTokenUserPublicKey1",
 		owner: "TestTokenOwner1",
 		hash: "TestTokenHash1",
-		auction: null
+		auction: null,
+		offers: []
 	};
 
 	const testToken2: Token = {
@@ -219,7 +249,8 @@ test("Tokens update independently", async () => {
 		userPublicKey: "TestTokenUserPublicKey2",
 		owner: "TestTokenOwner2",
 		hash: "TestTokenHash2",
-		auction: null
+		auction: null,
+		offers: []
 	};
 
 	await tokensManager.addToken(testToken1);

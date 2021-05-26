@@ -21,7 +21,8 @@ export class TokensCollector {
 				userPublicKey: event.userPublicKey,
 				owner: event.owner,
 				hash: event.hash,
-				auction: null
+				auction: null,
+				offers: []
 			});
 		}
 	}

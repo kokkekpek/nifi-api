@@ -85,7 +85,7 @@ async function main(): Promise<void> {
 
 	console.log("Tokens manager initialization...");
 	const tokensStorage = new TokensStorageDatabase(db.getRepository(DatabaseToken));
-	const tokensManager = new TokensManager(tokensStorage, auctionsManager);
+	const tokensManager = new TokensManager(tokensStorage, auctionsManager, offersManager);
 
 	console.log("Actions manager initialization...");
 	const actionsStorage = new ActionsStorageDatabase({

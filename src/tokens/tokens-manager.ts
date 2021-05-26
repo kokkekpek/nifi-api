@@ -1,5 +1,7 @@
 import { Auction, AuctionsManager } from "../auctions/auctions-manager";
 import { AuctionStorageEntry } from "../auctions/auctions-storage";
+import { OffersManager } from "../offers/offers-manager";
+import { OfferStorageEntry } from "../offers/offers-storage";
 import { mutexLockOrAwait, mutexUnlock } from "../utils/mutex";
 import { ITokensStorage, TokenStorageEntry } from "./tokens-storage";
 
@@ -8,6 +10,7 @@ export type Token = {
 	readonly address: string;
 	readonly userPublicKey: string;
 	auction: Auction | null;
+	offers: OfferStorageEntry[];
 	owner: string;
 	hash: string;
 };
@@ -17,10 +20,16 @@ export type AddTokenResult = "success" | "token_with_such_id_already_exists";
 export class TokensManager {
 	private readonly storage: ITokensStorage;
 	private readonly auctionsManager: AuctionsManager;
+	private readonly offersManager: OffersManager;
 
-	constructor(storage: ITokensStorage, auctionsManager: AuctionsManager) {
+	constructor(
+		storage: ITokensStorage,
+		auctionsManager: AuctionsManager,
+		offersManager: OffersManager
+	) {
 		this.storage = storage;
 		this.auctionsManager = auctionsManager;
+		this.offersManager = offersManager;
 	}
 
 	public async addToken(token: Token): Promise<AddTokenResult> {
@@ -42,11 +51,14 @@ export class TokensManager {
 	}
 
 	private async getTokenByTokenStorageEntry(storageEntry: TokenStorageEntry): Promise<Token> {
+		const offers = await this.offersManager.getOffersByTokenId(storageEntry.id, null);
+
 		const token: Token = {
 			id: storageEntry.id,
 			address: storageEntry.address,
 			userPublicKey: storageEntry.userPublicKey,
 			auction: null,
+			offers,
 			owner: storageEntry.owner,
 			hash: storageEntry.hash
 		};

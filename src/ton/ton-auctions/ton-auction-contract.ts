@@ -16,6 +16,7 @@ export type TonAuctionContractGetInfoResult = {
 export interface ITonAuctionContract {
 	getInfo(): Promise<RgResult<TonAuctionContractGetInfoResult>>;
 	checkMessages(): Promise<void>;
+	finish(): Promise<RgResult<void>>;
 
 	bidEvent: Event<AuctionBid>;
 	finishEvent: Event<AuctionBid>;

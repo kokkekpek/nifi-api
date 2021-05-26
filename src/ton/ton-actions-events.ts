@@ -242,6 +242,20 @@ export class TonActionsEvents implements IActionsEvents {
 						token.auction.address
 					);
 
+					const currentTime = Math.floor(Date.now() / 1000);
+
+					if (token.auction.endTime >= currentTime) {
+						console.log("Auction", token.auction.address, "ended, requesting finish...");
+						const auctionFinishResult = await auctionContract.finish();
+
+						if (auctionFinishResult.is_success) {
+							console.log("Auction", token.auction.address, "successfully finished!");
+						} else {
+							console.log("Auction", token.auction.address, "finishing has failed!");
+							console.log(auctionFinishResult.error);
+						}
+					}
+
 					auctionContract.bidEvent.on((bidEvent) => {
 						if (token.auction === null) return;
 

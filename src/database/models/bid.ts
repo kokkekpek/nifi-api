@@ -13,7 +13,6 @@ export class DatabaseBid {
 	id!: number;
 
 	@Column({ length: 255, type: "varchar" })
-	@Index({ unique: true })
 	bid_id: string;
 
 	@Column({ length: 255, type: "varchar" })

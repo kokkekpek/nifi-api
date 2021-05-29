@@ -42,21 +42,8 @@ export class AuctionsManager {
 	}
 
 	public async addBid(bid: BidStorageEntry): Promise<AddBidResult> {
-		const mutexName = "saving_bid_" + bid.bidId;
-		await mutexLockOrAwait(mutexName);
-
-		try {
-			const hasBid = await this.bidsStorage.hasBidWithAuctionId(bid.bidId);
-
-			if (hasBid) {
-				return "bid_with_such_id_already_exists";
-			}
-	
-			await this.bidsStorage.addBid(bid);
-			return "success";
-		} finally {
-			mutexUnlock(mutexName);
-		}
+		await this.bidsStorage.addBid(bid);
+		return "success";
 	}
 
 	public async addAuction(auction: AuctionStorageEntry): Promise<AddAuctionResult> {

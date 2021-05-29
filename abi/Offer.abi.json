@@ -65,7 +65,8 @@
 				{"name":"id","type":"uint128"},
 				{"name":"creator","type":"address"},
 				{"name":"token","type":"address"},
-				{"name":"price","type":"uint128"}
+				{"name":"price","type":"uint128"},
+				{"name":"endTime","type":"uint32"}
 			],
 			"outputs": [
 			]

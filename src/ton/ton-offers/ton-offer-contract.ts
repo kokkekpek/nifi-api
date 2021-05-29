@@ -15,6 +15,7 @@ export type TonOfferCreatedEvent = {
 	readonly creator: string;
 	readonly token: string;
 	readonly price: string;
+	readonly endTime: string;
 };
 
 export interface ITonOfferContract {

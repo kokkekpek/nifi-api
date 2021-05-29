@@ -144,7 +144,7 @@ export class TonClientOfferContract implements ITonOfferContract {
 						price: createdEvent.price,
 						creator: createdEvent.creator,
 						fee: "0",
-						endTime: "0",
+						endTime: createdEvent.endTime,
 						status: "pending",
 						address: this.address
 					});
@@ -498,11 +498,16 @@ function getValidatedCreatedEventMessage(input: unknown): TonOfferCreatedEvent |
 		return null;
 	}
 
+	if (typeof input.endTime !== "string") {
+		return null;
+	}
+
 	return {
 		id: input.id,
 		creator: input.creator,
 		token: input.token,
-		price: input.price
+		price: input.price,
+		endTime: input.endTime
 	};
 }
 

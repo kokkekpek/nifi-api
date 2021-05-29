@@ -134,8 +134,6 @@ export class TonActionsEvents implements IActionsEvents {
 			owner: info.owner,
 			hash: info.hash
 		});
-
-		this.rootContract.updateLastTokenId();
 	}
 
 	private async tokenContractsLoop(): Promise<void> {
@@ -244,7 +242,7 @@ export class TonActionsEvents implements IActionsEvents {
 
 					const currentTime = Math.floor(Date.now() / 1000);
 
-					if (token.auction.endTime >= currentTime) {
+					if (currentTime >= token.auction.endTime) {
 						console.log("Auction", token.auction.address, "ended, requesting finish...");
 						const auctionFinishResult = await auctionContract.finish();
 

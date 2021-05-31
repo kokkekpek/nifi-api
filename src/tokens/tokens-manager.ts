@@ -13,6 +13,7 @@ export type Token = {
 	offers: OfferStorageEntry[];
 	owner: string;
 	hash: string;
+	creator: string;
 };
 
 export type AddTokenResult = "success" | "token_with_such_id_already_exists";
@@ -60,7 +61,8 @@ export class TokensManager {
 			auction: null,
 			offers,
 			owner: storageEntry.owner,
-			hash: storageEntry.hash
+			hash: storageEntry.hash,
+			creator: storageEntry.creator
 		};
 
 		if (storageEntry.auctionId !== undefined) {

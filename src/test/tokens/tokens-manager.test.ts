@@ -106,7 +106,8 @@ test("Get and add tokens", async () => {
 		owner: "TestTokenOwner1",
 		hash: "TestTokenHash1",
 		auction: null,
-		offers: []
+		offers: [],
+		creator: ""
 	};
 
 	expect(await tokensManager.addToken(testToken1)).toBe("success");
@@ -133,7 +134,8 @@ test("Get and add tokens", async () => {
 		owner: "TestTokenOwner2",
 		hash: "TestTokenHash2",
 		auction: null,
-		offers: []
+		offers: [],
+		creator: ""
 	};
 
 	expect(await tokensManager.addToken(testToken2)).toBe("success");
@@ -172,7 +174,8 @@ test("Add two tokens with the same id", async () => {
 		owner: "TestTokenOwner1",
 		hash: "TestTokenHash1",
 		auction: null,
-		offers: []
+		offers: [],
+		creator: ""
 	};
 
 	expect(await tokensManager.addToken(testToken1)).toBe("success");
@@ -187,7 +190,8 @@ test("Add tokens race condition avoid", async () => {
 		owner: "TestTokenOwner1",
 		hash: "TestTokenHash1",
 		auction: null,
-		offers: []
+		offers: [],
+		creator: ""
 	};
 
 	expect((await Promise.all([
@@ -204,7 +208,8 @@ test("Update token", async () => {
 		owner: "TestTokenOwner1",
 		hash: "TestTokenHash1",
 		auction: null,
-		offers: []
+		offers: [],
+		creator: ""
 	};
 
 	await tokensManager.addToken(testToken1);
@@ -240,7 +245,8 @@ test("Tokens update independently", async () => {
 		owner: "TestTokenOwner1",
 		hash: "TestTokenHash1",
 		auction: null,
-		offers: []
+		offers: [],
+		creator: ""
 	};
 
 	const testToken2: Token = {
@@ -250,7 +256,8 @@ test("Tokens update independently", async () => {
 		owner: "TestTokenOwner2",
 		hash: "TestTokenHash2",
 		auction: null,
-		offers: []
+		offers: [],
+		creator: ""
 	};
 
 	await tokensManager.addToken(testToken1);

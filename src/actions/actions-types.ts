@@ -9,6 +9,7 @@ export type ActionCreateToken = BaseAction & {
 	readonly userPublicKey: string;
 	readonly owner: string;
 	readonly hash: string;
+	readonly creator: string;
 };
 
 export type ActionChangeOwner = BaseAction & {

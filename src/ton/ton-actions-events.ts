@@ -21,6 +21,7 @@ type GetFullTokenInfoResult = {
 	readonly owner: string;
 	readonly hash: string;
 	readonly manager: string;
+	readonly creator: string;
 };
 
 export type TokenManagerChangedEvent = {
@@ -100,7 +101,8 @@ export class TonActionsEvents implements IActionsEvents {
 				publicKey: infoResult.data.publicKey,
 				owner: infoResult.data.owner,
 				hash: artInfoResult.data.hash,
-				manager: infoResult.data.manager
+				manager: infoResult.data.manager,
+				creator: artInfoResult.data.creator
 			}
 		};
 	}
@@ -134,7 +136,8 @@ export class TonActionsEvents implements IActionsEvents {
 			tokenId: info.id,
 			userPublicKey: info.publicKey,
 			owner: info.owner,
-			hash: info.hash
+			hash: info.hash,
+			creator: info.creator
 		});
 	}
 

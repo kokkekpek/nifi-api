@@ -2,6 +2,7 @@ import { RgResult } from "../../utils/result";
 
 export type TonTokenContractGetArtInfoResult = {
 	readonly hash: string;
+	readonly creator: string;
 };
 
 export type TonTokenContractGetInfoResult = {

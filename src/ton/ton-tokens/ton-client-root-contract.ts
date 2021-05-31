@@ -24,6 +24,7 @@ const ART_TOKEN_ABI: Abi = {
 
 export type ArtInfoResult = {
 	readonly hash: string;
+	readonly creator: string;
 };
 
 export type InfoResult = {
@@ -55,8 +56,13 @@ function getValidatedArtInfoResult(input: unknown): ArtInfoResult | null {
 		return null;
 	}
 
+	if (typeof input.creator !== "string") {
+		return null;
+	}
+
 	return {
-		hash: input.hash
+		hash: input.hash,
+		creator: input.creator
 	};
 }
 

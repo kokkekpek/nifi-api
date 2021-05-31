@@ -43,7 +43,8 @@ test("Get and add actions", async () => {
 		userPublicKey: "TestActionUserPublicKey1",
 		owner: "TestActionOwner1",
 		hash: "TestActionHash1",
-		time: 0
+		time: 0,
+		creator: ""
 	};
 
 	await actionsManager.addAction(testAction1);

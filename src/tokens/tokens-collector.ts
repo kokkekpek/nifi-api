@@ -22,7 +22,8 @@ export class TokensCollector {
 				owner: event.owner,
 				hash: event.hash,
 				auction: null,
-				offers: []
+				offers: [],
+				creator: event.creator
 			});
 		}
 	}

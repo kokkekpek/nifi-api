@@ -26,7 +26,8 @@ export class TokensStorageDatabase implements ITokensStorage {
 			null,
 			record.userPublicKey,
 			record.owner,
-			record.hash
+			record.hash,
+			record.creator
 		);
 
 		await this.repository.insert(databaseToken);
@@ -39,7 +40,8 @@ export class TokensStorageDatabase implements ITokensStorage {
 			userPublicKey: databaseToken.user_public_key,
 			owner: databaseToken.owner,
 			hash: databaseToken.hash,
-			auctionId: databaseToken.auction_id || undefined
+			auctionId: databaseToken.auction_id || undefined,
+			creator: databaseToken.creator
 		};
 	}
 

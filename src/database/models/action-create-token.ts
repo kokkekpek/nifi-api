@@ -32,6 +32,9 @@ export class DatabaseActionCreateToken {
 
 	@Column({ length: 255, type: "varchar" })
 	time: string;
+	
+	@Column({ length: 255, type: "varchar" })
+	creator: string;
 
 	constructor(
 		tokenId: string,
@@ -39,7 +42,8 @@ export class DatabaseActionCreateToken {
 		userPublicKey: string,
 		owner: string,
 		hash: string,
-		time: string
+		time: string,
+		creator: string
 	) {
 		this.tokenId = tokenId;
 		this.address = address;
@@ -47,5 +51,6 @@ export class DatabaseActionCreateToken {
 		this.owner = owner;
 		this.hash = hash;
 		this.time = time;
+		this.creator = creator;
 	}
 }

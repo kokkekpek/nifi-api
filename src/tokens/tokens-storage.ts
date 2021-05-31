@@ -5,6 +5,7 @@ export type TokenStorageEntry = {
 	readonly auctionId?: string;
 	readonly owner: string;
 	readonly hash: string;
+	readonly creator: string;
 };
 
 export interface ITokensStorage {

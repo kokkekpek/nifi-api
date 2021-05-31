@@ -34,7 +34,8 @@ export class ActionsStorageDatabase implements IActionsStorage {
 					action.userPublicKey,
 					action.owner,
 					action.hash,
-					action.time + ""
+					action.time + "",
+					action.creator
 				);
 
 				break;
@@ -79,7 +80,8 @@ export class ActionsStorageDatabase implements IActionsStorage {
 				userPublicKey: databaseAction.user_public_key,
 				owner: databaseAction.owner,
 				hash: databaseAction.hash,
-				time: +databaseAction.time
+				time: +databaseAction.time,
+				creator: databaseAction.creator
 			};
 		} else if (databaseAction instanceof DatabaseActionChangeOwner) {
 			action = {
@@ -129,14 +131,11 @@ export class ActionsStorageDatabase implements IActionsStorage {
 		const databaseActionsChangeOwner = await this.repositories.changeOwner.find();
 		const databaseActionsSetHash = await this.repositories.setHash.find();
 
-		const databaseActions: DatabaseAction[] = databaseActionsCreateToken.concat(
-			databaseActionsChangeOwner,
-			databaseActionsSetHash
-		);
+		const actionsCreateToken = this.getActionsByDatabaseActions(databaseActionsCreateToken);
+		const actionsChangeOwner = this.getActionsByDatabaseActions(databaseActionsChangeOwner);
+		const actionsSetHash = this.getActionsByDatabaseActions(databaseActionsSetHash);
 
-		const actions = this.getActionsByDatabaseActions(databaseActions);
-
-		return actions;
+		return actionsCreateToken.concat(actionsChangeOwner, actionsSetHash);
 	}
 
 	public async getActionsByUserPublicKey(userPublicKey: string): Promise<Action[]> {
@@ -148,14 +147,11 @@ export class ActionsStorageDatabase implements IActionsStorage {
 		const databaseActionsChangeOwner = await this.repositories.changeOwner.find(criteria);
 		const databaseActionsSetHash = await this.repositories.setHash.find(criteria);
 
-		const databaseActions: DatabaseAction[] = databaseActionsCreateToken.concat(
-			databaseActionsChangeOwner,
-			databaseActionsSetHash
-		);
+		const actionsCreateToken = this.getActionsByDatabaseActions(databaseActionsCreateToken);
+		const actionsChangeOwner = this.getActionsByDatabaseActions(databaseActionsChangeOwner);
+		const actionsSetHash = this.getActionsByDatabaseActions(databaseActionsSetHash);
 
-		const actions = this.getActionsByDatabaseActions(databaseActions);
-
-		return actions;
+		return actionsCreateToken.concat(actionsChangeOwner, actionsSetHash);
 	}
 
 	public async getActionsByTokenId(tokenId: string): Promise<Action[]> {
@@ -167,14 +163,11 @@ export class ActionsStorageDatabase implements IActionsStorage {
 		const databaseActionsChangeOwner = await this.repositories.changeOwner.find(criteria);
 		const databaseActionsSetHash = await this.repositories.setHash.find(criteria);
 
-		const databaseActions: DatabaseAction[] = databaseActionsCreateToken.concat(
-			databaseActionsChangeOwner,
-			databaseActionsSetHash
-		);
+		const actionsCreateToken = this.getActionsByDatabaseActions(databaseActionsCreateToken);
+		const actionsChangeOwner = this.getActionsByDatabaseActions(databaseActionsChangeOwner);
+		const actionsSetHash = this.getActionsByDatabaseActions(databaseActionsSetHash);
 
-		const actions = this.getActionsByDatabaseActions(databaseActions);
-
-		return actions;
+		return actionsCreateToken.concat(actionsChangeOwner, actionsSetHash);
 	}
 
 	public async getActionsByOwner(owner: string): Promise<Action[]> {
@@ -184,13 +177,10 @@ export class ActionsStorageDatabase implements IActionsStorage {
 		const databaseActionsChangeOwner = await this.repositories.changeOwner.find(criteria);
 		const databaseActionsSetHash = await this.repositories.setHash.find(criteria);
 
-		const databaseActions: DatabaseAction[] = databaseActionsCreateToken.concat(
-			databaseActionsChangeOwner,
-			databaseActionsSetHash
-		);
+		const actionsCreateToken = this.getActionsByDatabaseActions(databaseActionsCreateToken);
+		const actionsChangeOwner = this.getActionsByDatabaseActions(databaseActionsChangeOwner);
+		const actionsSetHash = this.getActionsByDatabaseActions(databaseActionsSetHash);
 
-		const actions = this.getActionsByDatabaseActions(databaseActions);
-
-		return actions;
+		return actionsCreateToken.concat(actionsChangeOwner, actionsSetHash);
 	}
 }

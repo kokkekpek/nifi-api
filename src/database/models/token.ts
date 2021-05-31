@@ -33,13 +33,17 @@ export class DatabaseToken {
 	@Column({ length: 255, type: "varchar" })
 	hash: string;
 
+	@Column({ length: 255, type: "varchar" })
+	creator: string;
+
 	constructor(
 		tokenId: string,
 		address: string,
 		auctionId: string | null,
 		userPublicKey: string,
 		owner: string,
-		hash: string
+		hash: string,
+		creator: string
 	) {
 		this.tokenId = tokenId;
 		this.address = address;
@@ -47,5 +51,6 @@ export class DatabaseToken {
 		this.user_public_key = userPublicKey;
 		this.owner = owner;
 		this.hash = hash;
+		this.creator = creator;
 	}
 }

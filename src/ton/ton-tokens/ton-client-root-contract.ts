@@ -5,6 +5,7 @@ import {
 } from "@tonclient/core";
 
 import * as fs from "fs";
+import { getMultipleBocs } from "../../utils";
 import { Event } from "../../utils/events";
 import { RgResult } from "../../utils/result";
 import { timeout } from "../../utils/timeout";
@@ -15,6 +16,28 @@ const ART_ROOT_ABI: Abi = {
 	value: JSON.parse(fs.readFileSync("./abi/ArtRoot.abi.json", "utf-8"))
 };
 
+
+const ART_TOKEN_ABI: Abi = {
+	type: "Contract",
+	value: JSON.parse(fs.readFileSync("./abi/ArtToken.abi.json", "utf-8"))
+};
+
+export type ArtInfoResult = {
+	readonly hash: string;
+};
+
+export type InfoResult = {
+	readonly id: string;
+	readonly publicKey: string;
+	readonly owner: string;
+	readonly manager: string;
+};
+
+export type TotalInfo = {
+	readonly baseInfo: InfoResult;
+	readonly artInfo: ArtInfoResult;
+};
+
 type BocResult = {
 	readonly boc: string;
 };
@@ -22,6 +45,49 @@ type BocResult = {
 type GetTokenAddressResult = {
 	readonly addr: string;
 };
+
+function getValidatedArtInfoResult(input: unknown): ArtInfoResult | null {
+	if (!isStruct(input)) {
+		return null;
+	}
+
+	if (typeof input.hash !== "string") {
+		return null;
+	}
+
+	return {
+		hash: input.hash
+	};
+}
+
+function getValidatedInfoResult(input: unknown): InfoResult | null {
+	if (!isStruct(input)) {
+		return null;
+	}
+
+	if (typeof input.id !== "string") {
+		return null;
+	}
+
+	if (typeof input.owner !== "string") {
+		return null;
+	}
+
+	if (typeof input.publicKey !== "string") {
+		return null;
+	}
+
+	if (typeof input.manager !== "string") {
+		return null;
+	}
+
+	return {
+		id: input.id,
+		owner: input.owner,
+		publicKey: input.publicKey,
+		manager: input.manager
+	};
+}
 
 export class TonClientRootContract implements ITonRootContract {
 	public readonly created = new Event<TonContractTokenCreatedEvent>();
@@ -88,6 +154,112 @@ export class TonClientRootContract implements ITonRootContract {
 			const floodLimitsPreventiveDelayMs = 1000;
 			await timeout(floodLimitsPreventiveDelayMs);
 		}
+	}
+
+	private async rawInvoke(boc: string, functionName: string): Promise<RgResult<unknown, number>> {
+		let result: ResultOfRunTvm;
+
+		try {
+			const encodedMessage = await this.tonClient.abi.encode_message({
+				abi: ART_TOKEN_ABI,
+				signer: {
+					type: "None"
+				},
+				call_set: {
+					function_name: functionName,
+					input: {}
+				},
+				address: this.address
+			});
+			
+			result = await this.tonClient.tvm.run_tvm({
+				message: encodedMessage.message,
+				account: boc
+			});
+		} catch (err) {
+			return {
+				is_success: false,
+				error: {
+					code: -1,
+					message: err.message
+				}
+			};
+		}
+
+		const rawMessage = result.out_messages[0];
+		if (!rawMessage) {
+			return {
+				is_success: false,
+				error: {
+					code: -1,
+					message: "Response does not contain messages"
+				}
+			};
+		}
+
+		const decoded = await this.tonClient.abi.decode_message({
+			abi: ART_TOKEN_ABI,
+			message: rawMessage
+		});
+
+		if (!decoded.value) {
+			return {
+				is_success: false,
+				error: {
+					code: -1,
+					message: "Response does not contain useful data"
+				}
+			};
+		}
+
+		return {
+			is_success: true,
+			data: decoded.value
+		};
+	}
+
+	public async getInfoAboutMultipleAccounts(
+		addresses: string[]
+	): Promise<RgResult<[string, TotalInfo][]>> {
+		const bocs = await getMultipleBocs(this.tonClient, addresses);
+		if (!bocs.is_success) {
+			return bocs;
+		}
+
+		const result: [string, TotalInfo][] = [];
+		for (const [address, boc] of bocs.data.entries()) {
+			const info = await this.rawInvoke(boc, "getInfo");
+			if (!info.is_success) {
+				continue;
+			}
+
+			const validInfo = getValidatedInfoResult(info.data);
+			if (!validInfo) {
+				continue;
+			}
+
+			const artResult = await this.rawInvoke(boc, "getArtInfo");
+
+			if (!artResult.is_success) {
+				continue;
+			}
+
+			const artResultValidated = getValidatedArtInfoResult(artResult.data);
+
+			if (artResultValidated === null) {
+				continue;
+			}
+
+			result.push([address, {
+				baseInfo: validInfo,
+				artInfo: artResultValidated
+			}]);
+		}
+
+		return {
+			is_success: true,
+			data: result
+		};
 	}
 
 	private async getTokenAddress(tokenId: string): Promise<RgResult<string, unknown>> {

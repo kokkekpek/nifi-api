@@ -188,7 +188,7 @@ export class TonClientTokenContract implements ITonTokenContract {
 				filter: {
 					id: { eq: this.address },
 				},
-				result: "boc",
+				result: "boc id",
 				limit: 1
 			});
 

@@ -146,13 +146,19 @@ export class TonActionsEvents implements IActionsEvents {
 		}
 
 		const repo = this.art2Root.getDatabase().getRepository(DatabaseCollection);
-		const c = await repo.save(new DatabaseCollection(
-			info.data.id,
-			event.series,
-			seriesMax.data.limit,
-			seriesMax.data.symbol,
-			seriesMax.data.name
-		));
+		let cl = await repo.findOne({ tokenId: seriesMax.data.id });
+		if (!cl) {
+			cl = await repo.save(new DatabaseCollection(
+				info.data.id,
+				event.series,
+				seriesMax.data.limit,
+				seriesMax.data.symbol,
+				seriesMax.data.name
+			));
+		}
+
+		cl.supply = seriesMax.data.totalSupply;
+		await repo.save(cl);
 
 		this.event.emit({
 			action: "mint",
@@ -164,7 +170,7 @@ export class TonActionsEvents implements IActionsEvents {
 			userPublicKey: info.data.publicKey,
 			owner: info.data.owner,
 			maximum: seriesMax.data.limit,
-			collection: c.tokenId
+			collection: cl.tokenId
 		});
 	}
 

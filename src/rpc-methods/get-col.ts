@@ -4,7 +4,7 @@ import { RpcRequest } from "../rpc/rpc-request";
 import { IRpcRequestHandler, RpcRequestHandlerRequiredParameter } from "../rpc/rpc-request-handler";
 
 type Parameters = {
-	readonly tokenId: string;
+	readonly collectionId: string;
 };
 
 export class GetCollection implements IRpcRequestHandler<Parameters>  {
@@ -15,7 +15,7 @@ export class GetCollection implements IRpcRequestHandler<Parameters>  {
 	}
 
 	public async onRequest(request: RpcRequest<Parameters>): Promise<void> {
-		const result = await this.repo.find({ tokenId: request.getParameters().tokenId });
+		const result = await this.repo.find({ tokenId: request.getParameters().collectionId });
 
 		request.success({
 			result
@@ -24,7 +24,7 @@ export class GetCollection implements IRpcRequestHandler<Parameters>  {
 
 	public getRequiredParameters(): RpcRequestHandlerRequiredParameter[] {
 		return [{
-			parameterName: "tokenId",
+			parameterName: "collectionId",
 			parameterType: "string"
 		}];
 	}

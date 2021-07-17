@@ -28,6 +28,9 @@ export class DatabaseCollection {
 	@Column({ length: 255, type: "varchar" })
 	symbol: string;
 
+	@Column({ length: 255, type: "varchar" })
+	supply: string;
+
 	constructor(
 		tokenId: string,
 		address: string,
@@ -40,5 +43,6 @@ export class DatabaseCollection {
 		this.maximum = maximum;
 		this.name = name;
 		this.symbol = symbol;
+		this.supply = "0";
 	}
 }

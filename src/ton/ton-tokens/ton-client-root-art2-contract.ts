@@ -160,6 +160,7 @@ export type SeriesInfo = {
 	limit: string;
 	name: string;
 	symbol: string;
+	totalSupply: string;
 };
 function getValidatedSeries(input: unknown): SeriesInfo | null {
 	if (!isStruct(input)) {
@@ -182,11 +183,16 @@ function getValidatedSeries(input: unknown): SeriesInfo | null {
 		return null;
 	}
 
+	if (typeof input.totalSupply !== "string") {
+		return null;
+	}
+
 	return {
 		id: input.id,
 		limit: input.limit,
 		name: input.name,
-		symbol: input.symbol
+		symbol: input.symbol,
+		totalSupply: input.totalSupply
 	};
 }
 
@@ -524,7 +530,8 @@ export class TonClientRootArt2Contract implements ITonRootArt2Contract {
 				limit: ok.limit,
 				id: ok.id,
 				symbol: ok.symbol,
-				name: ok.name
+				name: ok.name,
+				totalSupply: ok.totalSupply
 			}
 		};
 	}

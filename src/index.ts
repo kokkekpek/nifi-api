@@ -152,7 +152,7 @@ async function main(): Promise<void> {
 	const getAllActions = new GetAllActions(actionsManager);
 	const getTokensByUser = new GetTokensByUserPublicKey(tokensManager);
 	const getTokensByOwner = new GetTokensByOwner(tokensManager);
-	const getTokenById = new GetTokenById(tokensManager);
+	const getTokenById = new GetTokenById(tokensManager, db.getRepository(DatabaseCollection));
 	const getAllTokens = new GetAllTokens(tokensManager);
 	const getOffers = new GetOffers(offersManager);
 	const getAuctions = new GetAuctions(auctionsManager);

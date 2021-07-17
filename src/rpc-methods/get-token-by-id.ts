@@ -1,3 +1,5 @@
+import { Repository } from "typeorm";
+import { DatabaseCollection } from "../database/models/collection";
 import { RpcRequest } from "../rpc/rpc-request";
 import { IRpcRequestHandler, RpcRequestHandlerRequiredParameter } from "../rpc/rpc-request-handler";
 import { StatusCodes } from "../rpc/rpc-server";
@@ -10,9 +12,11 @@ type Parameters = {
 
 export class GetTokenById implements IRpcRequestHandler<Parameters> {
 	private readonly tokensManager: TokensManager;
+	private rpo: Repository<DatabaseCollection>;
 
-	constructor(tokensManager: TokensManager) {
+	constructor(tokensManager: TokensManager, rpo: Repository<DatabaseCollection>) {
 		this.tokensManager = tokensManager;
+		this.rpo = rpo;
 	}
 
 	public async onRequest(request: RpcRequest<Parameters>): Promise<void> {
@@ -24,9 +28,11 @@ export class GetTokenById implements IRpcRequestHandler<Parameters> {
 			return;
 		}
 
-		request.success({
-			result
-		});
+		const coll = await this.rpo.findOne({ tokenId: parameters.collectionId });
+		const bad = result as any;
+		bad.collectionDto = coll;
+
+		request.success(bad);
 	}
 
 	public getRequiredParameters(): RpcRequestHandlerRequiredParameter[] {

@@ -15,6 +15,7 @@ import { ITonRootContract, TonContractTokenCreatedEvent } from "./ton-tokens/ton
 import { ITonTokenContract, ITonTokenContractFactory } from "./ton-tokens/ton-token-contract";
 import { TotalInfo } from "./ton-tokens/ton-client-root-contract";
 import { ITonRootArt2Contract, TonContractArt2Mint, TonContractArt2Series } from "./ton-tokens/ton-root-art2-contract";
+import { DatabaseCollection } from "../database/models/collection";
 
 type GetFullTokenInfoResult = {
 	readonly id: string;
@@ -139,10 +140,19 @@ export class TonActionsEvents implements IActionsEvents {
 			return;
 		}
 
-		const seriesMax = await this.art2Root.getSeriesMaximum(event.series);
+		const seriesMax = await this.art2Root.getSeriesInfo(event.series);
 		if (!seriesMax.is_success) {
 			return;
 		}
+
+		const repo = this.art2Root.getDatabase().getRepository(DatabaseCollection);
+		await repo.save(new DatabaseCollection(
+			info.data.id,
+			event.series,
+			seriesMax.data.limit,
+			seriesMax.data.symbol,
+			seriesMax.data.name
+		));
 
 		this.event.emit({
 			action: "mint",
@@ -153,7 +163,7 @@ export class TonActionsEvents implements IActionsEvents {
 			hash: artInfo.data.hash,
 			userPublicKey: info.data.publicKey,
 			owner: info.data.owner,
-			maximum: seriesMax.data
+			maximum: seriesMax.data.limit
 		});
 	}
 

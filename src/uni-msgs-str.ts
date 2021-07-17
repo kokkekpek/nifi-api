@@ -1,17 +1,23 @@
-import { Repository } from "typeorm";
+import { Connection, Repository } from "typeorm";
 import { DatabaseUniStorage } from "./database/models/uni-str";
 import { ITonMessagesCheckerStorage } from "./ton/ton-messages-checker-storage";
 
 export class UniversalMessageStorage implements ITonMessagesCheckerStorage {
 	private readonly repository: Repository<DatabaseUniStorage>;
+	private c: Connection;
 
-	constructor(repository: Repository<DatabaseUniStorage>) {
+	constructor(conn: Connection, repository: Repository<DatabaseUniStorage>) {
 		this.repository = repository;
+		this.c = conn;
 	}
 
 	public async getAll(): Promise<string[]> {
 		const all = await this.repository.find();
 		return all.map(a => a.address);
+	}
+
+	public getDatabase(): Connection {
+		return this.c;
 	}
 
 	public async setLastMessageTimeByAddress(address: string, lastMessageTime: number): Promise<void> {

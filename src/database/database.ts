@@ -8,6 +8,7 @@ import { DatabaseActionMintToken } from "./models/action-mint-token";
 import { DatabaseActionSetHash } from "./models/action-set-hash";
 import { DatabaseAuction } from "./models/auction";
 import { DatabaseBid } from "./models/bid";
+import { DatabaseCollection } from "./models/collection";
 import { DatabaseOffer } from "./models/offer";
 import { DatabaseToken } from "./models/token";
 import { DatabaseUniStorage } from "./models/uni-str";
@@ -51,7 +52,8 @@ export async function createDatabase(config: MysqlConfig): Promise<Connection> {
 			DatabaseAuction,
 			DatabaseBid,
 			DatabaseOffer,
-			DatabaseUniStorage
+			DatabaseUniStorage,
+			DatabaseCollection
 		]
 	});
 

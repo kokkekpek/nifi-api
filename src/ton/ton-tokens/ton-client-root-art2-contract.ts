@@ -13,6 +13,8 @@ import { RgResult } from "../../utils/result";
 import { ITonRootArt2Contract, TonContractArt2Mint, TonContractArt2Series } from "./ton-root-art2-contract";
 import { ITonMessagesCheckerStorage } from "./../ton-messages-checker-storage";
 import { timeout } from "../../utils/timeout";
+import { Connection } from "typeorm";
+import { UniversalMessageStorage } from "../../uni-msgs-str";
 
 const ART2_ROOT_ABI: Abi = {
 	type: "Contract",
@@ -153,9 +155,11 @@ function getValidatedEncodedMessage(input: unknown): EncodedMessage | null {
 	};
 }
 
-type SeriesInfo = {
+export type SeriesInfo = {
 	id: string;
 	limit: string;
+	name: string;
+	symbol: string;
 };
 function getValidatedSeries(input: unknown): SeriesInfo | null {
 	if (!isStruct(input)) {
@@ -170,9 +174,19 @@ function getValidatedSeries(input: unknown): SeriesInfo | null {
 		return null;
 	}
 
+	if (typeof input.name !== "string") {
+		return null;
+	}
+
+	if (typeof input.symbol !== "string") {
+		return null;
+	}
+
 	return {
 		id: input.id,
 		limit: input.limit,
+		name: input.name,
+		symbol: input.symbol
 	};
 }
 
@@ -226,11 +240,11 @@ export class TonClientRootArt2Contract implements ITonRootArt2Contract {
 	public readonly series: Event<TonContractArt2Series> = new Event();
 	public readonly mint: Event<TonContractArt2Mint> = new Event();
 
-	private readonly storage: ITonMessagesCheckerStorage;
+	private readonly storage: UniversalMessageStorage;
 	private readonly tonClient: TonClient;
 	private readonly address: string;
 
-	constructor(storage: ITonMessagesCheckerStorage, tonClient: TonClient, address: string) {
+	constructor(storage: UniversalMessageStorage, tonClient: TonClient, address: string) {
 		this.tonClient = tonClient;
 		this.address = address;
 		this.storage = storage;
@@ -483,7 +497,11 @@ export class TonClientRootArt2Contract implements ITonRootArt2Contract {
 		setTimeout(this.checkMessagesRoot.bind(this), 1000);
 	}
 
-	public async getSeriesMaximum(addr: string): Promise<RgResult<string>> {
+	public getDatabase(): Connection {
+		return this.storage.getDatabase();
+	}
+
+	public async getSeriesInfo(addr: string): Promise<RgResult<SeriesInfo>> {
 		const info = await this.invoke(addr, "getInfo");
 		if (!info.is_success) {
 			return info;
@@ -502,7 +520,12 @@ export class TonClientRootArt2Contract implements ITonRootArt2Contract {
 
 		return {
 			is_success: true,
-			data: ok.limit
+			data: {
+				limit: ok.limit,
+				id: ok.id,
+				symbol: ok.symbol,
+				name: ok.name
+			}
 		};
 	}
 

@@ -48,6 +48,9 @@ import { DatabaseActionMintToken } from './database/models/action-mint-token';
 import { TonClientRootArt2Contract } from './ton/ton-tokens/ton-client-root-art2-contract';
 import { UniversalMessageStorage } from './uni-msgs-str';
 import { DatabaseUniStorage } from './database/models/uni-str';
+import { GetAllCollections } from './rpc-methods/get-collections';
+import { DatabaseCollection } from './database/models/collection';
+import { GetCollection } from './rpc-methods/get-col';
 
 TonClient.useBinaryLibrary(libNode);
 async function main(): Promise<void> {
@@ -114,7 +117,7 @@ async function main(): Promise<void> {
 	);
 
 	const art2Root = new TonClientRootArt2Contract(
-		new UniversalMessageStorage(db.getRepository(DatabaseUniStorage)),
+		new UniversalMessageStorage(db, db.getRepository(DatabaseUniStorage)),
 		tonClient,
 		config.ton.art2RootContractAddress
 	);
@@ -153,6 +156,7 @@ async function main(): Promise<void> {
 	const getAllTokens = new GetAllTokens(tokensManager);
 	const getOffers = new GetOffers(offersManager);
 	const getAuctions = new GetAuctions(auctionsManager);
+	const getCols = new GetAllCollections(db.getRepository(DatabaseCollection));
 
 	rpcServer.addMethod("get-actions-by-token", getActionsByToken);
 	rpcServer.addMethod("get-actions-by-user", getActionsByUser);
@@ -164,6 +168,8 @@ async function main(): Promise<void> {
 	rpcServer.addMethod("get-all-tokens", getAllTokens);
 	rpcServer.addMethod("get-offers", getOffers);
 	rpcServer.addMethod("get-auctions", getAuctions);
+	rpcServer.addMethod("get-collections", getCols);
+	rpcServer.addMethod("get-collection-by-id", new GetCollection(db.getRepository(DatabaseCollection)));
 
 	console.log("Initialization done!");
 }

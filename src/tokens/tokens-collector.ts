@@ -25,7 +25,8 @@ export class TokensCollector {
 				auction: null,
 				offers: [],
 				creator: event.creator,
-				maximum: null
+				maximum: null,
+				collection: "0"
 			});
 		}
 
@@ -40,7 +41,8 @@ export class TokensCollector {
 				auction: null,
 				offers: [],
 				creator: event.creator,
-				maximum: event.maximum
+				maximum: event.maximum,
+				collection: event.collection
 			});
 		}
 	}

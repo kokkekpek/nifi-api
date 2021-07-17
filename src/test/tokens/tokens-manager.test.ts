@@ -100,6 +100,7 @@ test("Get and add tokens", async () => {
 	expect(await tokensManager.getTokensByUserPublicKey("InvalidUserPublicKey")).toHaveLength(0);
 
 	const testToken1: Token = {
+		collection: "0",
 		type: "art1",
 		id: "TestTokenId1",
 		address: "TestTokenAddress1",
@@ -131,6 +132,7 @@ test("Get and add tokens", async () => {
 
 	const testToken2: Token = {
 		type: "art1",
+		collection: "0",
 		id: "TestTokenId2",
 		address: "TestTokenAddress2",
 		userPublicKey: "TestTokenUserPublicKey2",
@@ -173,6 +175,7 @@ test("Get and add tokens", async () => {
 test("Add two tokens with the same id", async () => {
 	const testToken1: Token = {
 		type: "art1",
+		collection: "0",
 		id: "TestTokenId1",
 		address: "TestTokenAddress1",
 		userPublicKey: "TestTokenUserPublicKey1",
@@ -191,6 +194,7 @@ test("Add two tokens with the same id", async () => {
 test("Add tokens race condition avoid", async () => {
 	const testToken1: Token = {
 		type: "art1",
+		collection: "0",
 		id: "TestTokenId1",
 		address: "TestTokenAddress1",
 		userPublicKey: "TestTokenUserPublicKey1",
@@ -211,6 +215,7 @@ test("Add tokens race condition avoid", async () => {
 test("Update token", async () => {
 	const testToken1: Token = {
 		type: "art1",
+		collection: "0",
 		id: "TestTokenId1",
 		address: "TestTokenAddress1",
 		userPublicKey: "TestTokenUserPublicKey1",
@@ -250,6 +255,7 @@ test("Update token", async () => {
 test("Tokens update independently", async () => {
 	const testToken1: Token = {
 		type: "art1",
+		collection: "0",
 		id: "TestTokenId1",
 		address: "TestTokenAddress1",
 		userPublicKey: "TestTokenUserPublicKey1",
@@ -263,6 +269,7 @@ test("Tokens update independently", async () => {
 
 	const testToken2: Token = {
 		type: "art1",
+		collection: "0",
 		id: "TestTokenId2",
 		address: "TestTokenAddress2",
 		userPublicKey: "TestTokenUserPublicKey2",

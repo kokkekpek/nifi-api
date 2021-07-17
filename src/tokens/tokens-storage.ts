@@ -8,13 +8,14 @@ export type TokenStorageEntry = {
 	readonly hash: string;
 	readonly creator: string;
 	readonly maximum: string | null;
+	readonly collection: string;
 };
 
 export interface ITokensStorage {
 	hasTokenWithId(tokenId: string): Promise<boolean>;
 	addToken(record: TokenStorageEntry): Promise<void>;
 	getAllTokens(): Promise<TokenStorageEntry[]>;
-	getTokenById(tokenId: string): Promise<TokenStorageEntry | undefined>;
+	getTokenById(tokenId: string, collectionId: string): Promise<TokenStorageEntry | undefined>;
 	getTokenByAddress(tokenAddress: string): Promise<TokenStorageEntry | undefined>;
 	getTokensByUserPublicKey(userPublicKey: string): Promise<TokenStorageEntry[]>;
 	getTokensByOwner(owner: string): Promise<TokenStorageEntry[]>;

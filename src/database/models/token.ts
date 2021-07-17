@@ -13,7 +13,7 @@ export class DatabaseToken {
 	id!: number;
 
 	@Column({ length: 255, type: "varchar" })
-	@Index({ unique: true })
+	@Index({ unique: false })
 	tokenId: string;
 
 	@Column({ length: 255, type: "varchar", nullable: true, default: null })
@@ -42,6 +42,10 @@ export class DatabaseToken {
 	@Column({ length: 255, type: "varchar" })
 	creator: string;
 
+	@Column({ length: 255, type: "varchar" })
+	@Index()
+	collection: string;
+
 	constructor(
 		tokenId: string,
 		address: string,
@@ -51,7 +55,8 @@ export class DatabaseToken {
 		hash: string,
 		creator: string,
 		type: string,
-		maximum: string | null
+		maximum: string | null,
+		collection: string
 	) {
 		this.tokenId = tokenId;
 		this.address = address;
@@ -62,5 +67,6 @@ export class DatabaseToken {
 		this.creator = creator;
 		this.type = type;
 		this.maximum = maximum;
+		this.collection = collection;
 	}
 }

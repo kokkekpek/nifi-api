@@ -5,6 +5,7 @@ import { TokensManager } from "../tokens/tokens-manager";
 
 type Parameters = {
 	readonly tokenId: string;
+	readonly collectionId: string;
 };
 
 export class GetTokenById implements IRpcRequestHandler<Parameters> {
@@ -16,7 +17,7 @@ export class GetTokenById implements IRpcRequestHandler<Parameters> {
 
 	public async onRequest(request: RpcRequest<Parameters>): Promise<void> {
 		const parameters = request.getParameters();
-		const result = await this.tokensManager.getTokenById(parameters.tokenId);
+		const result = await this.tokensManager.getTokenById(parameters.tokenId, parameters.collectionId);
 
 		if (!result) {
 			request.error("Not found", StatusCodes.NotFound);
@@ -31,6 +32,9 @@ export class GetTokenById implements IRpcRequestHandler<Parameters> {
 	public getRequiredParameters(): RpcRequestHandlerRequiredParameter[] {
 		return [{
 			parameterName: "tokenId",
+			parameterType: "string"
+		}, {
+			parameterName: "collectionId",
 			parameterType: "string"
 		}];
 	}

@@ -75,7 +75,8 @@ export class ActionsStorageDatabase implements IActionsStorage {
 					action.hash,
 					action.time + "",
 					action.creator,
-					action.maximum
+					action.maximum,
+					action.collection
 				);
 
 				break;
@@ -131,7 +132,8 @@ export class ActionsStorageDatabase implements IActionsStorage {
 				hash: databaseAction.hash,
 				time: +databaseAction.time,
 				maximum: databaseAction.max,
-				creator: databaseAction.creator
+				creator: databaseAction.creator,
+				collection: databaseAction.collection
 			};
 		} else {
 			throw new Error(

@@ -29,7 +29,8 @@ export class TokensStorageDatabase implements ITokensStorage {
 			record.hash,
 			record.creator,
 			record.type,
-			record.maximum
+			record.maximum,
+			record.collection
 		);
 
 		await this.repository.insert(databaseToken);
@@ -45,12 +46,13 @@ export class TokensStorageDatabase implements ITokensStorage {
 			hash: databaseToken.hash,
 			auctionId: databaseToken.auction_id || undefined,
 			creator: databaseToken.creator,
-			maximum: databaseToken.maximum
+			maximum: databaseToken.maximum,
+			collection: databaseToken.collection
 		};
 	}
 
-	public async getTokenById(tokenId: string): Promise<TokenStorageEntry | undefined> {
-		const databaseToken = await this.repository.findOne({ tokenId });
+	public async getTokenById(tokenId: string, collectionId: string): Promise<TokenStorageEntry | undefined> {
+		const databaseToken = await this.repository.findOne({ tokenId, collection: collectionId });
 
 		if (!databaseToken) return;
 

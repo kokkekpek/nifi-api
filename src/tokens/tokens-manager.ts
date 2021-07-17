@@ -11,6 +11,7 @@ export type Token = {
 	readonly address: string;
 	readonly userPublicKey: string;
 	readonly maximum: string | null;
+	readonly collection: string;
 	auction: Auction | null;
 	offers: OfferStorageEntry[];
 	owner: string;
@@ -66,7 +67,8 @@ export class TokensManager {
 			owner: storageEntry.owner,
 			hash: storageEntry.hash,
 			creator: storageEntry.creator,
-			maximum: storageEntry.maximum
+			maximum: storageEntry.maximum,
+			collection: storageEntry.collection
 		};
 
 		if (storageEntry.auctionId !== undefined) {
@@ -111,8 +113,8 @@ export class TokensManager {
 		await this.storage.setHashByTokenId(tokenId, newHash);
 	}
 
-	public async getTokenById(tokenId: string): Promise<Token | undefined> {
-		const result = await this.storage.getTokenById(tokenId);
+	public async getTokenById(tokenId: string, collectionId: string): Promise<Token | undefined> {
+		const result = await this.storage.getTokenById(tokenId, collectionId);
 
 		if (!result) return;
 

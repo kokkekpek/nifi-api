@@ -146,7 +146,7 @@ export class TonActionsEvents implements IActionsEvents {
 		}
 
 		const repo = this.art2Root.getDatabase().getRepository(DatabaseCollection);
-		await repo.save(new DatabaseCollection(
+		const c = await repo.save(new DatabaseCollection(
 			info.data.id,
 			event.series,
 			seriesMax.data.limit,
@@ -163,7 +163,8 @@ export class TonActionsEvents implements IActionsEvents {
 			hash: artInfo.data.hash,
 			userPublicKey: info.data.publicKey,
 			owner: info.data.owner,
-			maximum: seriesMax.data.limit
+			maximum: seriesMax.data.limit,
+			collection: c.tokenId
 		});
 	}
 

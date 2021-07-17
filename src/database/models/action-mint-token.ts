@@ -39,6 +39,9 @@ export class DatabaseActionMintToken {
 	@Column({ length: 255, type: "varchar" })
 	max: string;
 
+	@Column({ length: 255, type: "varchar" })
+	collection: string;
+
 	constructor(
 		tokenId: string,
 		address: string,
@@ -47,7 +50,8 @@ export class DatabaseActionMintToken {
 		hash: string,
 		time: string,
 		creator: string,
-		max: string
+		max: string,
+		collection: string
 	) {
 		this.tokenId = tokenId;
 		this.address = address;
@@ -57,5 +61,6 @@ export class DatabaseActionMintToken {
 		this.time = time;
 		this.creator = creator;
 		this.max = max;
+		this.collection = collection;
 	}
 }

@@ -21,6 +21,7 @@ export type ActionMintToken = BaseAction & {
 	readonly hash: string;
 	readonly creator: string;
 	readonly maximum: string;
+	readonly collection: string;
 };
 
 export type ActionChangeOwner = BaseAction & {

@@ -27,7 +27,9 @@ export class TokensStorageDatabase implements ITokensStorage {
 			record.userPublicKey,
 			record.owner,
 			record.hash,
-			record.creator
+			record.creator,
+			record.type,
+			record.maximum
 		);
 
 		await this.repository.insert(databaseToken);
@@ -35,13 +37,15 @@ export class TokensStorageDatabase implements ITokensStorage {
 
 	private getTokenByDatabaseToken(databaseToken: DatabaseToken): TokenStorageEntry {
 		return {
+			type: databaseToken.type as "art1" | "art2",
 			id: databaseToken.tokenId,
 			address: databaseToken.address,
 			userPublicKey: databaseToken.user_public_key,
 			owner: databaseToken.owner,
 			hash: databaseToken.hash,
 			auctionId: databaseToken.auction_id || undefined,
-			creator: databaseToken.creator
+			creator: databaseToken.creator,
+			maximum: databaseToken.maximum
 		};
 	}
 

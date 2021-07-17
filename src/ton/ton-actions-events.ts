@@ -14,6 +14,7 @@ import { ITonRootOffersContract, TonOfferCreatedEvent } from "./ton-offers/ton-r
 import { ITonRootContract, TonContractTokenCreatedEvent } from "./ton-tokens/ton-root-contract";
 import { ITonTokenContract, ITonTokenContractFactory } from "./ton-tokens/ton-token-contract";
 import { TotalInfo } from "./ton-tokens/ton-client-root-contract";
+import { ITonRootArt2Contract, TonContractArt2Mint, TonContractArt2Series } from "./ton-tokens/ton-root-art2-contract";
 
 type GetFullTokenInfoResult = {
 	readonly id: string;
@@ -44,6 +45,8 @@ export class TonActionsEvents implements IActionsEvents {
 
 	private readonly offersRootContract: ITonRootOffersContract;
 	private readonly offerContractFactory: ITonOfferContractFactory;
+
+	private readonly art2Root: ITonRootArt2Contract;
 	
 	constructor(
 		tokensManager: TokensManager,
@@ -53,7 +56,8 @@ export class TonActionsEvents implements IActionsEvents {
 		tokenContractFactory: ITonTokenContractFactory,
 		auctionContractFactory: ITonAuctionContractFactory,
 		offersRootContract: ITonRootOffersContract,
-		offerContractFactory: ITonOfferContractFactory
+		offerContractFactory: ITonOfferContractFactory,
+		art2Root: ITonRootArt2Contract
 	) {
 		this.tokensManager = tokensManager;
 		this.auctionsManager = auctionsManager;
@@ -64,6 +68,10 @@ export class TonActionsEvents implements IActionsEvents {
 		this.offersRootContract = offersRootContract;
 		this.offerContractFactory = offerContractFactory;
 
+		this.art2Root = art2Root;
+
+		this.art2Root.mint.on(this.onMintCreated.bind(this));
+		this.art2Root.series.on(this.onSeriesCreated.bind(this));
 		this.rootContract.created.on(this.onTokenCreated.bind(this));
 		this.offersRootContract.created.on(this.onOfferContract.bind(this));
 
@@ -115,11 +123,45 @@ export class TonActionsEvents implements IActionsEvents {
 		await offerContract.checkMessages();
 	}
 
+	private async onSeriesCreated(event: TonContractArt2Series): Promise<void> {
+		this.art2Root.setSeries(event.addr, Math.floor(Date.now() / 1000));
+	}
+
+	private async onMintCreated(event: TonContractArt2Mint): Promise<void> {
+		const token = await this.tokenContractFactory.getTokenContract("art2", event.addr);
+		const info = await token.getInfo();
+		if (!info.is_success) {
+			return;
+		}
+
+		const artInfo = await token.getArtInfo();
+		if (!artInfo.is_success) {
+			return;
+		}
+
+		const seriesMax = await this.art2Root.getSeriesMaximum(event.series);
+		if (!seriesMax.is_success) {
+			return;
+		}
+
+		this.event.emit({
+			action: "mint",
+			time: Date.now(),
+			address: event.addr,
+			tokenId: info.data.id,
+			creator: artInfo.data.creator,
+			hash: artInfo.data.hash,
+			userPublicKey: info.data.publicKey,
+			owner: info.data.owner,
+			maximum: seriesMax.data
+		});
+	}
+
 	private async onTokenCreated(event: TonContractTokenCreatedEvent): Promise<void> {
 		console.log("Received token creation event from root contract:\n", event);
 
 		console.log("Receiving detailed information about the contract", event.addr);
-		const tokenContract = this.tokenContractFactory.getTokenContract(event.addr);
+		const tokenContract = this.tokenContractFactory.getTokenContract("art1", event.addr);
 		const fullTokenInfoResult = await this.getFullTokenInfo(tokenContract);
 		
 		if (!fullTokenInfoResult.is_success) {

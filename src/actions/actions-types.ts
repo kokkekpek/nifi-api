@@ -12,6 +12,17 @@ export type ActionCreateToken = BaseAction & {
 	readonly creator: string;
 };
 
+export type ActionMintToken = BaseAction & {
+	readonly action: "mint";
+	readonly tokenId: string;
+	readonly address: string;
+	readonly userPublicKey: string;
+	readonly owner: string;
+	readonly hash: string;
+	readonly creator: string;
+	readonly maximum: string;
+};
+
 export type ActionChangeOwner = BaseAction & {
 	readonly action: "changeOwner";
 	readonly tokenId: string;
@@ -32,4 +43,4 @@ export type ActionSetHash = BaseAction & {
 	readonly hash: string;
 };
 
-export type Action = ActionCreateToken | ActionChangeOwner | ActionSetHash;
+export type Action = ActionCreateToken | ActionChangeOwner | ActionSetHash | ActionMintToken;

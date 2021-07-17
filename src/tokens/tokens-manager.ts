@@ -6,9 +6,11 @@ import { mutexLockOrAwait, mutexUnlock } from "../utils/mutex";
 import { ITokensStorage, TokenStorageEntry } from "./tokens-storage";
 
 export type Token = {
+	readonly type: "art1" | "art2";
 	readonly id: string;
 	readonly address: string;
 	readonly userPublicKey: string;
+	readonly maximum: string | null;
 	auction: Auction | null;
 	offers: OfferStorageEntry[];
 	owner: string;
@@ -55,6 +57,7 @@ export class TokensManager {
 		const offers = await this.offersManager.getOffersByTokenId(storageEntry.id, null);
 
 		const token: Token = {
+			type: storageEntry.type,
 			id: storageEntry.id,
 			address: storageEntry.address,
 			userPublicKey: storageEntry.userPublicKey,
@@ -62,7 +65,8 @@ export class TokensManager {
 			offers,
 			owner: storageEntry.owner,
 			hash: storageEntry.hash,
-			creator: storageEntry.creator
+			creator: storageEntry.creator,
+			maximum: storageEntry.maximum
 		};
 
 		if (storageEntry.auctionId !== undefined) {

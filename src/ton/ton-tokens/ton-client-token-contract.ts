@@ -15,6 +15,11 @@ const ART_TOKEN_ABI: Abi = {
 	value: JSON.parse(fs.readFileSync("./abi/ArtToken.abi.json", "utf-8"))
 };
 
+const ART2_TOKEN_ABI: Abi = {
+	type: "Contract",
+	value: JSON.parse(fs.readFileSync("./abi/Art2Token.abi.json", "utf-8"))
+};
+
 type ArtInfoResult = {
 	readonly hash: string;
 	readonly creator: string;
@@ -38,18 +43,20 @@ export class TonClientTokenContractFactory implements ITonTokenContractFactory {
 		this.tonClient = tonClient;
 	}
 
-	public getTokenContract(addr: string): ITonTokenContract {
-		return new TonClientTokenContract(this.tonClient, addr);
+	public getTokenContract(type: "art1" | "art2", addr: string): ITonTokenContract {
+		return new TonClientTokenContract(type, this.tonClient, addr);
 	}
 }
 
 export class TonClientTokenContract implements ITonTokenContract {
 	private readonly tonClient: TonClient;
 	private readonly address: string;
+	private readonly type: "art1" | "art2";
 
-	constructor(tonClient: TonClient, address: string) {
+	constructor(type: "art1" | "art2", tonClient: TonClient, address: string) {
 		this.tonClient = tonClient;
 		this.address = address;
+		this.type = type;
 	}
 
 	public getAddress(): string {
@@ -123,7 +130,7 @@ export class TonClientTokenContract implements ITonTokenContract {
 
 		try {
 			const encodedMessage = await this.tonClient.abi.encode_message({
-				abi: ART_TOKEN_ABI,
+				abi: this.type === "art1" ? ART_TOKEN_ABI : ART2_TOKEN_ABI,
 				signer: {
 					type: "None"
 				},
@@ -160,7 +167,7 @@ export class TonClientTokenContract implements ITonTokenContract {
 		}
 
 		const decoded = await this.tonClient.abi.decode_message({
-			abi: ART_TOKEN_ABI,
+			abi: this.type === "art1" ? ART_TOKEN_ABI : ART2_TOKEN_ABI,
 			message: rawMessage
 		});
 

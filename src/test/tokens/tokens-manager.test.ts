@@ -100,6 +100,7 @@ test("Get and add tokens", async () => {
 	expect(await tokensManager.getTokensByUserPublicKey("InvalidUserPublicKey")).toHaveLength(0);
 
 	const testToken1: Token = {
+		type: "art1",
 		id: "TestTokenId1",
 		address: "TestTokenAddress1",
 		userPublicKey: "TestTokenUserPublicKey1",
@@ -107,7 +108,8 @@ test("Get and add tokens", async () => {
 		hash: "TestTokenHash1",
 		auction: null,
 		offers: [],
-		creator: ""
+		creator: "",
+		maximum: "0"
 	};
 
 	expect(await tokensManager.addToken(testToken1)).toBe("success");
@@ -128,6 +130,7 @@ test("Get and add tokens", async () => {
 	expect(tokensByOwnerAfterFirstAddition[0]).toMatchObject(testToken1);
 
 	const testToken2: Token = {
+		type: "art1",
 		id: "TestTokenId2",
 		address: "TestTokenAddress2",
 		userPublicKey: "TestTokenUserPublicKey2",
@@ -135,7 +138,8 @@ test("Get and add tokens", async () => {
 		hash: "TestTokenHash2",
 		auction: null,
 		offers: [],
-		creator: ""
+		creator: "",
+		maximum: "0"
 	};
 
 	expect(await tokensManager.addToken(testToken2)).toBe("success");
@@ -168,6 +172,7 @@ test("Get and add tokens", async () => {
 
 test("Add two tokens with the same id", async () => {
 	const testToken1: Token = {
+		type: "art1",
 		id: "TestTokenId1",
 		address: "TestTokenAddress1",
 		userPublicKey: "TestTokenUserPublicKey1",
@@ -175,7 +180,8 @@ test("Add two tokens with the same id", async () => {
 		hash: "TestTokenHash1",
 		auction: null,
 		offers: [],
-		creator: ""
+		creator: "",
+		maximum: "0"
 	};
 
 	expect(await tokensManager.addToken(testToken1)).toBe("success");
@@ -184,6 +190,7 @@ test("Add two tokens with the same id", async () => {
 
 test("Add tokens race condition avoid", async () => {
 	const testToken1: Token = {
+		type: "art1",
 		id: "TestTokenId1",
 		address: "TestTokenAddress1",
 		userPublicKey: "TestTokenUserPublicKey1",
@@ -191,7 +198,8 @@ test("Add tokens race condition avoid", async () => {
 		hash: "TestTokenHash1",
 		auction: null,
 		offers: [],
-		creator: ""
+		creator: "",
+		maximum: "0"
 	};
 
 	expect((await Promise.all([
@@ -202,6 +210,7 @@ test("Add tokens race condition avoid", async () => {
 
 test("Update token", async () => {
 	const testToken1: Token = {
+		type: "art1",
 		id: "TestTokenId1",
 		address: "TestTokenAddress1",
 		userPublicKey: "TestTokenUserPublicKey1",
@@ -209,7 +218,8 @@ test("Update token", async () => {
 		hash: "TestTokenHash1",
 		auction: null,
 		offers: [],
-		creator: ""
+		creator: "",
+		maximum: "0"
 	};
 
 	await tokensManager.addToken(testToken1);
@@ -239,6 +249,7 @@ test("Update token", async () => {
 
 test("Tokens update independently", async () => {
 	const testToken1: Token = {
+		type: "art1",
 		id: "TestTokenId1",
 		address: "TestTokenAddress1",
 		userPublicKey: "TestTokenUserPublicKey1",
@@ -246,10 +257,12 @@ test("Tokens update independently", async () => {
 		hash: "TestTokenHash1",
 		auction: null,
 		offers: [],
-		creator: ""
+		creator: "",
+		maximum: "0"
 	};
 
 	const testToken2: Token = {
+		type: "art1",
 		id: "TestTokenId2",
 		address: "TestTokenAddress2",
 		userPublicKey: "TestTokenUserPublicKey2",
@@ -257,7 +270,8 @@ test("Tokens update independently", async () => {
 		hash: "TestTokenHash2",
 		auction: null,
 		offers: [],
-		creator: ""
+		creator: "",
+		maximum: "0"
 	};
 
 	await tokensManager.addToken(testToken1);

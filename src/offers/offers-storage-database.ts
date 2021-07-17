@@ -11,6 +11,10 @@ export class OffersStorageDatabase implements IOffersStorage, ITonMessagesChecke
 		this.repository = repository;
 	}
 
+	public async getAll(): Promise<string[]> {
+		return [];
+	}
+
 	public async setLastMessageTimeByAddress(address: string, lastMessageTime: number): Promise<void> {
 		await this.repository.update({ address }, {
 			last_message_time: lastMessageTime

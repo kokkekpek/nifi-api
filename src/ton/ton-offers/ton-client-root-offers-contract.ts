@@ -81,7 +81,6 @@ export class TonClientRootOffersContract implements ITonRootOffersContract {
 			const offerAddressResult = await this.getOfferAddress(offerId + "");
 
 			if (!offerAddressResult.is_success) {
-				console.log("Failed to get offer address with id", offerId);
 				console.log(offerAddressResult.error);
 
 				continue;

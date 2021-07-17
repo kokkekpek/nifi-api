@@ -4,6 +4,7 @@ import { ActionsStorageDatabase } from "../../actions/actions-storage-database";
 import { ActionCreateToken, ActionSetHash } from "../../actions/actions-types";
 import { DatabaseActionChangeOwner } from "../../database/models/action-change-owner";
 import { DatabaseActionCreateToken } from "../../database/models/action-create-token";
+import { DatabaseActionMintToken } from "../../database/models/action-mint-token";
 import { DatabaseActionSetHash } from "../../database/models/action-set-hash";
 
 let actionsManager: ActionsManager;
@@ -25,7 +26,8 @@ beforeEach(async () => {
 	const storage = new ActionsStorageDatabase({
 		"create": connection.getRepository(DatabaseActionCreateToken),
 		"changeOwner": connection.getRepository(DatabaseActionChangeOwner),
-		"setHash": connection.getRepository(DatabaseActionSetHash)
+		"setHash": connection.getRepository(DatabaseActionSetHash),
+		"mint": connection.getRepository(DatabaseActionMintToken)
 	});
 
 	actionsManager = new ActionsManager(storage);

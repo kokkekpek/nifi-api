@@ -44,6 +44,10 @@ import { TonClientRootOffersContract } from './ton/ton-offers/ton-client-root-of
 import { TonClientOfferContractFactory } from './ton/ton-offers/ton-client-offer-contract';
 import { GetOffers } from './rpc-methods/get-offers';
 import { GetAuctions } from './rpc-methods/get-auctions';
+import { DatabaseActionMintToken } from './database/models/action-mint-token';
+import { TonClientRootArt2Contract } from './ton/ton-tokens/ton-client-root-art2-contract';
+import { UniversalMessageStorage } from './uni-msgs-str';
+import { DatabaseUniStorage } from './database/models/uni-str';
 
 TonClient.useBinaryLibrary(libNode);
 async function main(): Promise<void> {
@@ -91,7 +95,8 @@ async function main(): Promise<void> {
 	const actionsStorage = new ActionsStorageDatabase({
 		changeOwner: db.getRepository(DatabaseActionChangeOwner),
 		create: db.getRepository(DatabaseActionCreateToken),
-		setHash: db.getRepository(DatabaseActionSetHash)
+		setHash: db.getRepository(DatabaseActionSetHash),
+		mint: db.getRepository(DatabaseActionMintToken)
 	});
 	const actionsManager = new ActionsManager(actionsStorage);
 
@@ -108,6 +113,12 @@ async function main(): Promise<void> {
 		tokensManager
 	);
 
+	const art2Root = new TonClientRootArt2Contract(
+		new UniversalMessageStorage(db.getRepository(DatabaseUniStorage)),
+		tonClient,
+		config.ton.art2RootContractAddress
+	);
+
 	console.log("TON Event Provider initialization...");
 	const tonActionsEvents = new TonActionsEvents(
 		tokensManager,
@@ -117,7 +128,8 @@ async function main(): Promise<void> {
 		tonClientTokenContractFactory,
 		tonClientAuctionContractFactory,
 		tonClientOffersRootContract,
-		tonClientOffersContractFactory
+		tonClientOffersContractFactory,
+		art2Root
 	);
 
 	console.log("Action collector initialization...");

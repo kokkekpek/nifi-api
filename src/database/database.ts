@@ -4,11 +4,13 @@ import {
 } from "typeorm";
 import { DatabaseActionChangeOwner } from "./models/action-change-owner";
 import { DatabaseActionCreateToken } from "./models/action-create-token";
+import { DatabaseActionMintToken } from "./models/action-mint-token";
 import { DatabaseActionSetHash } from "./models/action-set-hash";
 import { DatabaseAuction } from "./models/auction";
 import { DatabaseBid } from "./models/bid";
 import { DatabaseOffer } from "./models/offer";
 import { DatabaseToken } from "./models/token";
+import { DatabaseUniStorage } from "./models/uni-str";
 
 
 export type MysqlConfig = {
@@ -42,12 +44,14 @@ export async function createDatabase(config: MysqlConfig): Promise<Connection> {
 	
 		entities: [
 			DatabaseToken,
+			DatabaseActionMintToken,
 			DatabaseActionChangeOwner,
 			DatabaseActionSetHash,
 			DatabaseActionCreateToken,
 			DatabaseAuction,
 			DatabaseBid,
-			DatabaseOffer
+			DatabaseOffer,
+			DatabaseUniStorage
 		]
 	});
 

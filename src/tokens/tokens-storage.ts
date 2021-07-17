@@ -1,4 +1,5 @@
 export type TokenStorageEntry = {
+	readonly type: "art1" | "art2";
 	readonly id: string;
 	readonly address: string;
 	readonly userPublicKey: string;
@@ -6,6 +7,7 @@ export type TokenStorageEntry = {
 	readonly owner: string;
 	readonly hash: string;
 	readonly creator: string;
+	readonly maximum: string | null;
 };
 
 export interface ITokensStorage {

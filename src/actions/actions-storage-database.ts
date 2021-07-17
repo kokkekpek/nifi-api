@@ -3,6 +3,7 @@
 import { Repository } from "typeorm";
 import { DatabaseActionChangeOwner } from "../database/models/action-change-owner";
 import { DatabaseActionCreateToken } from "../database/models/action-create-token";
+import { DatabaseActionMintToken } from "../database/models/action-mint-token";
 import { DatabaseActionSetHash } from "../database/models/action-set-hash";
 import { IActionsStorage } from "./actions-storage";
 import { Action } from "./actions-types";
@@ -11,9 +12,11 @@ export type ActionsDatabaseRequiredRepositories = {
 	readonly "create": Repository<DatabaseActionCreateToken>;
 	readonly "changeOwner": Repository<DatabaseActionChangeOwner>;
 	readonly "setHash": Repository<DatabaseActionSetHash>;
+	readonly "mint": Repository<DatabaseActionMintToken>;
 };
 
-type DatabaseAction = DatabaseActionCreateToken | DatabaseActionChangeOwner | DatabaseActionSetHash;
+type DatabaseAction = 
+	DatabaseActionCreateToken | DatabaseActionChangeOwner | DatabaseActionSetHash | DatabaseActionMintToken;
 
 export class ActionsStorageDatabase implements IActionsStorage {
 	private readonly repositories: ActionsDatabaseRequiredRepositories;
@@ -63,6 +66,19 @@ export class ActionsStorageDatabase implements IActionsStorage {
 				);
 
 				break;
+			case "mint":
+				databaseAction = new DatabaseActionMintToken(
+					action.tokenId,
+					action.address,
+					action.userPublicKey,
+					action.owner,
+					action.hash,
+					action.time + "",
+					action.creator,
+					action.maximum
+				);
+
+				break;
 		}
 
 		return databaseAction;
@@ -105,6 +121,18 @@ export class ActionsStorageDatabase implements IActionsStorage {
 				hash: databaseAction.hash,
 				time: +databaseAction.time
 			};
+		} else if (databaseAction instanceof DatabaseActionMintToken) {
+			action = {
+				action: "mint",
+				tokenId: databaseAction.tokenId,
+				address: databaseAction.address,
+				userPublicKey: databaseAction.user_public_key,
+				owner: databaseAction.owner,
+				hash: databaseAction.hash,
+				time: +databaseAction.time,
+				maximum: databaseAction.max,
+				creator: databaseAction.creator
+			};
 		} else {
 			throw new Error(
 				"Unsupported DatabaseAction:\n"
@@ -130,12 +158,14 @@ export class ActionsStorageDatabase implements IActionsStorage {
 		const databaseActionsCreateToken = await this.repositories.create.find();
 		const databaseActionsChangeOwner = await this.repositories.changeOwner.find();
 		const databaseActionsSetHash = await this.repositories.setHash.find();
+		const databaseActionsMint = await this.repositories.mint.find();
 
 		const actionsCreateToken = this.getActionsByDatabaseActions(databaseActionsCreateToken);
 		const actionsChangeOwner = this.getActionsByDatabaseActions(databaseActionsChangeOwner);
 		const actionsSetHash = this.getActionsByDatabaseActions(databaseActionsSetHash);
+		const actionsMint = this.getActionsByDatabaseActions(databaseActionsMint);
 
-		return actionsCreateToken.concat(actionsChangeOwner, actionsSetHash);
+		return actionsCreateToken.concat(actionsChangeOwner, actionsSetHash, actionsMint);
 	}
 
 	public async getActionsByUserPublicKey(userPublicKey: string): Promise<Action[]> {

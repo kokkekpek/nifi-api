@@ -16,6 +16,7 @@ export class TokensCollector {
 	private onActionEvent(event: Action): void {
 		if (event.action === "create") {
 			this.tokensManager.addToken({
+				type: "art1",
 				id: event.tokenId,
 				address: event.address,
 				userPublicKey: event.userPublicKey,
@@ -23,7 +24,23 @@ export class TokensCollector {
 				hash: event.hash,
 				auction: null,
 				offers: [],
-				creator: event.creator
+				creator: event.creator,
+				maximum: null
+			});
+		}
+
+		if (event.action === "mint") {
+			this.tokensManager.addToken({
+				type: "art2",
+				id: event.tokenId,
+				address: event.address,
+				userPublicKey: event.userPublicKey,
+				owner: event.owner,
+				hash: event.hash,
+				auction: null,
+				offers: [],
+				creator: event.creator,
+				maximum: event.maximum
 			});
 		}
 	}

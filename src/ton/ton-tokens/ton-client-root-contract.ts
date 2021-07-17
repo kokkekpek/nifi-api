@@ -32,6 +32,7 @@ export type InfoResult = {
 	readonly publicKey: string;
 	readonly owner: string;
 	readonly manager: string;
+	readonly maximum: string | null;
 };
 
 export type TotalInfo = {
@@ -91,7 +92,8 @@ function getValidatedInfoResult(input: unknown): InfoResult | null {
 		id: input.id,
 		owner: input.owner,
 		publicKey: input.publicKey,
-		manager: input.manager
+		manager: input.manager,
+		maximum: null
 	};
 }
 
@@ -138,7 +140,6 @@ export class TonClientRootContract implements ITonRootContract {
 			const tokenAddressResult = await this.getTokenAddress(tokenId + "");
 
 			if (!tokenAddressResult.is_success) {
-				console.log("Failed to get token address with id", tokenId);
 				console.log(tokenAddressResult.error);
 
 				continue;

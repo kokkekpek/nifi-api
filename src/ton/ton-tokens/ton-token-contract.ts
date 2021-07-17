@@ -19,5 +19,5 @@ export interface ITonTokenContract {
 }
 
 export interface ITonTokenContractFactory {
-	getTokenContract(addr: string): ITonTokenContract;
+	getTokenContract(type: "art1" | "art2", addr: string): ITonTokenContract;
 }
